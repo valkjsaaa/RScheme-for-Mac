@@ -1,0 +1,51 @@
+%{
+    
+    #import "MessageBlocks.h"
+    
+    int yylex(void);
+    void yyerror(char *s);
+    
+%}
+
+%union {
+    NSNumber* number;
+    NSString* string;
+    NSString* identifier;
+    NSString* expression;
+    NSString* list;
+}
+
+%token <number> NUMBER
+
+%token <identifier> IDENTIFIER
+
+%token <string> STRING
+
+
+%type <expression> expr
+%type <expression> list
+%type <expression> atom
+%type <expression> exprend
+
+%%
+
+prog : list { if (ParseTestSuccessBlock) ParseTestSuccessBlock($1); }
+
+list: list expr {$$ = [NSString stringWithFormat:@"%@ %@",$1,$2]; }
+| list atom {$$ = [NSString stringWithFormat:@"%@ %@",$1,$2];}
+| expr {$$ = $1;}
+| atom {$$ = $1;printf("acquired!!!");}
+;
+
+expr: '(' exprend {$$ = [NSString stringWithFormat:@"(%@)",$2];}
+;
+
+exprend: list ')' {$$ = $1;}
+;
+
+atom: NUMBER {$$ = [NSString stringWithFormat:@"%@",$1];}
+| STRING {$$ = [NSString stringWithFormat:@"%@",$1];}
+| IDENTIFIER {$$ = [NSString stringWithFormat:@"%@",$1];}
+;
+
+%%

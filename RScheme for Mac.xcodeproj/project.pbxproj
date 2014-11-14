@@ -13,6 +13,10 @@
 		8C42F3221A04DD0C002F7463 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8C42F3211A04DD0C002F7463 /* Images.xcassets */; };
 		8C42F3251A04DD0C002F7463 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8C42F3231A04DD0C002F7463 /* Main.storyboard */; };
 		8C42F3311A04DD0C002F7463 /* RScheme_for_MacTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F3301A04DD0C002F7463 /* RScheme_for_MacTests.m */; };
+		8C42F33C1A04DD46002F7463 /* parser.ym in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F33B1A04DD46002F7463 /* parser.ym */; };
+		8C42F33E1A04DD61002F7463 /* tokenizer.lm in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F33D1A04DD61002F7463 /* tokenizer.lm */; };
+		8C42F3401A04F943002F7463 /* RSchemeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F33F1A04F943002F7463 /* RSchemeParser.m */; };
+		8C42F3451A050D7B002F7463 /* RSSchemeParserInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F3441A050D7B002F7463 /* RSSchemeParserInternal.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +42,12 @@
 		8C42F32A1A04DD0C002F7463 /* RScheme for MacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RScheme for MacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C42F32F1A04DD0C002F7463 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8C42F3301A04DD0C002F7463 /* RScheme_for_MacTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RScheme_for_MacTests.m; sourceTree = "<group>"; };
+		8C42F33B1A04DD46002F7463 /* parser.ym */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.yacc; name = parser.ym; path = "RScheme for Mac/RScheme Core/parser.ym"; sourceTree = "<group>"; };
+		8C42F33D1A04DD61002F7463 /* tokenizer.lm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; name = tokenizer.lm; path = "RScheme for Mac/RScheme Core/tokenizer.lm"; sourceTree = "<group>"; };
+		8C42F33F1A04F943002F7463 /* RSchemeParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSchemeParser.m; sourceTree = "<group>"; };
+		8C42F3421A04F965002F7463 /* RSchemeParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RSchemeParser.h; sourceTree = "<group>"; };
+		8C42F3431A050D7B002F7463 /* RSSchemeParserInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSSchemeParserInternal.h; path = "RScheme for Mac/RScheme Core/RSSchemeParserInternal.h"; sourceTree = "<group>"; };
+		8C42F3441A050D7B002F7463 /* RSSchemeParserInternal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RSSchemeParserInternal.m; path = "RScheme for Mac/RScheme Core/RSSchemeParserInternal.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +71,7 @@
 		8C42F30B1A04DD0C002F7463 = {
 			isa = PBXGroup;
 			children = (
+				8C42F33A1A04DD1C002F7463 /* RScheme Core */,
 				8C42F3161A04DD0C002F7463 /* RScheme for Mac */,
 				8C42F32D1A04DD0C002F7463 /* RScheme for MacTests */,
 				8C42F3151A04DD0C002F7463 /* Products */,
@@ -114,6 +125,19 @@
 				8C42F32F1A04DD0C002F7463 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		8C42F33A1A04DD1C002F7463 /* RScheme Core */ = {
+			isa = PBXGroup;
+			children = (
+				8C42F33B1A04DD46002F7463 /* parser.ym */,
+				8C42F33D1A04DD61002F7463 /* tokenizer.lm */,
+				8C42F3421A04F965002F7463 /* RSchemeParser.h */,
+				8C42F33F1A04F943002F7463 /* RSchemeParser.m */,
+				8C42F3431A050D7B002F7463 /* RSSchemeParserInternal.h */,
+				8C42F3441A050D7B002F7463 /* RSSchemeParserInternal.m */,
+			);
+			name = "RScheme Core";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,6 +241,10 @@
 			files = (
 				8C42F3201A04DD0C002F7463 /* ViewController.m in Sources */,
 				8C42F31D1A04DD0C002F7463 /* main.m in Sources */,
+				8C42F33E1A04DD61002F7463 /* tokenizer.lm in Sources */,
+				8C42F33C1A04DD46002F7463 /* parser.ym in Sources */,
+				8C42F3401A04F943002F7463 /* RSchemeParser.m in Sources */,
+				8C42F3451A050D7B002F7463 /* RSSchemeParserInternal.m in Sources */,
 				8C42F31B1A04DD0C002F7463 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
