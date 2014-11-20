@@ -1,7 +1,7 @@
 %{
     
     #import "y.tab.h"
-    #import "MessageBlocks.h"
+    #import "RSSchemeParserInternal.h"
     
     void yyerror(char *s);
     

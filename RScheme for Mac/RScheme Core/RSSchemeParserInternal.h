@@ -6,6 +6,27 @@
 //  Copyright (c) 2014 Jackie Yang. All rights reserved.
 //
 
+// This file is mainly adapted from Bootstrap Scheme by Peter Michaux.
+// Below is the original copyright section.
+
+/*
+ * Bootstrap Scheme - a quick and very dirty Scheme interpreter.
+ * Copyright (C) 2010 Peter Michaux (http://peter.michaux.ca/)
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public
+ * License version 3 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License version 3 for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License version 3 along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
 #import <Cocoa/Cocoa.h>
 
 @class RSObject;
@@ -107,8 +128,28 @@ char is_true(RSObject* obj)
     return !is_false(obj);
 }
 
-//TODO
-RSObject* make_symbol(NSString* value);
+RSObject* make_symbol(NSString* value)
+{
+    RSObject* obj;
+    RSObject* element;
+
+    /* search for they symbol in the symbol table */
+    element = symbol_table;
+    while (!is_the_empty_list(element)) {
+        if ([car(element).data.symbol.value isEqualToString:value]) {
+            return car(element);
+        }
+        element = cdr(element);
+    };
+
+    /* create the symbol and add it to the symbol table */
+    obj = [RSObject new];
+    obj.type = SYMBOL;
+    obj.data.symbol = [RSString new];
+    obj.data.symbol.value = [value copy];
+    symbol_table = cons(obj, symbol_table);
+    return obj;
+}
 
 char is_symbol(RSObject* obj)
 {
@@ -494,12 +535,28 @@ RSObject* eval_proc(RSObject* arguments)
     NSLog(@"illegal state: The body of the eval primitive procedure should not execute.\n");
     exit(1);
 }
-//!!! what is wrong?
-RSObject* read_RSObject(NSFileHandle* in);
+
+RSObject* _read(NSFileHandle* in);
 RSObject* eval(RSObject* exp, RSObject* env);
 
-//TODO: implement this fuction
-RSObject* load_proc(RSObject* arguments);
+RSObject* load_proc(RSObject* arguments)
+{
+    NSString* filename;
+    NSFileHandle* in;
+    RSObject* exp;
+    RSObject* result;
+
+    filename = car(arguments).data.string.value;
+    in = [NSFileHandle fileHandleForReadingAtPath:filename];
+    if (in == nil) {
+        NSLog(@"could not load file \"%@\"", filename);
+        exit(1);
+    }
+    while ((exp = _read(in)) != NULL) {
+        result = eval(exp, the_global_environment);
+    }
+    return result;
+}
 
 RSObject* make_input_port(FILE* in);
 
@@ -547,12 +604,12 @@ RSObject* write_char_proc(RSObject* arguments);
 
 void write_RSObject(NSFileHandle* out, RSObject* obj);
 
-RSObject* write_proc(NSFileHandle * out, RSObject* arguments);
+RSObject* write_proc(NSFileHandle* out, RSObject* arguments);
 
 RSObject* error_proc(RSObject* arguments)
 {
     while (!is_the_empty_list(arguments)) {
-        NSFileHandle *stderr = [NSFileHandle fileHandleWithStandardError];
+        NSFileHandle* stderr = [NSFileHandle fileHandleWithStandardError];
         write_proc(stderr, car(arguments));
         arguments = cdr(arguments);
     };
@@ -721,14 +778,14 @@ void populate_environment(RSObject* env)
     add_procedure(@"string?", is_string_proc);
     add_procedure(@"pair?", is_pair_proc);
     add_procedure(@"procedure?", is_procedure_proc);
-    
+
     add_procedure(@"char.integer", char_to_integer_proc);
     add_procedure(@"integer.char", integer_to_char_proc);
     add_procedure(@"number.string", number_to_string_proc);
     add_procedure(@"string.number", string_to_number_proc);
     add_procedure(@"symbol.string", symbol_to_string_proc);
     add_procedure(@"string.symbol", string_to_symbol_proc);
-    
+
     add_procedure(@"+", add_proc);
     add_procedure(@"-", sub_proc);
     add_procedure(@"*", mul_proc);
@@ -737,24 +794,24 @@ void populate_environment(RSObject* env)
     add_procedure(@"=", is_number_equal_proc);
     add_procedure(@"<", is_less_than_proc);
     add_procedure(@">", is_greater_than_proc);
-    
+
     add_procedure(@"cons", cons_proc);
     add_procedure(@"car", car_proc);
     add_procedure(@"cdr", cdr_proc);
     add_procedure(@"set-car!", set_car_proc);
     add_procedure(@"set-cdr!", set_cdr_proc);
     add_procedure(@"list", list_proc);
-    
+
     add_procedure(@"eq?", is_eq_proc);
-    
+
     add_procedure(@"apply", apply_proc);
-    
+
     add_procedure(@"interaction-environment",
                   interaction_environment_proc);
     add_procedure(@"null-environment", null_environment_proc);
     add_procedure(@"environment", environment_proc);
     add_procedure(@"eval", eval_proc);
-    
+
     add_procedure(@"load", load_proc);
     add_procedure(@"open-input-port", open_input_port_proc);
     add_procedure(@"close-input-port", close_input_port_proc);
@@ -768,7 +825,7 @@ void populate_environment(RSObject* env)
     add_procedure(@"output-port?", is_output_port_proc);
     add_procedure(@"write-char", write_char_proc);
     //add_procedure(@"write", write_proc);
-    
+
     add_procedure(@"error", error_proc);
 }
 
@@ -781,20 +838,21 @@ RSObject* make_environment(void)
     return env;
 }
 
-void init(void) {
+void init(void)
+{
     the_empty_list = [RSObject new];
     the_empty_list.type = THE_EMPTY_LIST;
-    
+
     false_value = [RSObject new];
     false_value.type = BOOLEAN;
     false_value.data.boolean = [RSNumber alloc];
     false_value.data.boolean.value = 0;
-    
+
     true_value = [RSObject new];
     true_value.type = BOOLEAN;
     true_value.data.boolean = [RSNumber alloc];
     true_value.data.boolean.value = 1;
-    
+
     symbol_table = the_empty_list;
     quote_symbol = make_symbol(@"quote");
     define_symbol = make_symbol(@"define");
@@ -808,45 +866,47 @@ void init(void) {
     let_symbol = make_symbol(@"let");
     and_symbol = make_symbol(@"and");
     or_symbol = make_symbol(@"or");
-    
-//    eof_RSObject = [RSObject new];
-//    eof_RSObject.type = EOF_OBJECT;
-    
+
+    //    eof_RSObject = [RSObject new];
+    //    eof_RSObject.type = EOF_OBJECT;
+
     the_empty_environment = the_empty_list;
-    
+
     the_global_environment = make_environment();
 }
 
 /***************************** READ ******************************/
 
-char is_delimiter(int c) {
-    return isspace(c) || c == EOF ||
-    c == '('   || c == ')' ||
-    c == '"'   || c == ';';
+char is_delimiter(int c)
+{
+    return isspace(c) || c == EOF || c == '(' || c == ')' || c == '"' || c == ';';
 }
 
-char is_initial(int c) {
-    return isalpha(c) || c == '*' || c == '/' || c == '>' ||
-    c == '<' || c == '=' || c == '?' || c == '!';
+char is_initial(int c)
+{
+    return isalpha(c) || c == '*' || c == '/' || c == '>' || c == '<' || c == '=' || c == '?' || c == '!';
 }
 
-int peek(FILE *in) {
+int peek(FILE* in)
+{
     int c;
-    
+
     c = getc(in);
     ungetc(c, in);
     return c;
 }
 
-void eat_whitespace(FILE *in) {
+void eat_whitespace(FILE* in)
+{
     int c;
-    
+
     while ((c = getc(in)) != EOF) {
         if (isspace(c)) {
             continue;
         }
         else if (c == ';') { /* comments are whitespace also */
-            while (((c = getc(in)) != EOF) && (c != '\n'));
+            while (((c = getc(in)) != EOF) && (c != '\n'))
+                ;
             continue;
         }
         ungetc(c, in);
@@ -854,9 +914,10 @@ void eat_whitespace(FILE *in) {
     }
 }
 
-void eat_expected_string(FILE *in, char *str) {
+void eat_expected_string(FILE* in, char* str)
+{
     int c;
-    
+
     while (*str != '\0') {
         c = getc(in);
         if (c != *str) {
@@ -867,60 +928,219 @@ void eat_expected_string(FILE *in, char *str) {
     }
 }
 
-void peek_expected_delimiter(FILE *in) {
+void peek_expected_delimiter(FILE* in)
+{
     if (!is_delimiter(peek(in))) {
         fprintf(stderr, "character not followed by delimiter\n");
         exit(1);
     }
 }
 
-RSObject *read_character(FILE *in) {
+RSObject* read_character(FILE* in)
+{
     int c;
-    
+
     c = getc(in);
     switch (c) {
-        case EOF:
-            fprintf(stderr, "incomplete character literal\n");
-            exit(1);
-        case 's':
-            if (peek(in) == 'p') {
-                eat_expected_string(in, "pace");
-                peek_expected_delimiter(in);
-                return make_character(' ');
-            }
-            break;
-        case 'n':
-            if (peek(in) == 'e') {
-                eat_expected_string(in, "ewline");
-                peek_expected_delimiter(in);
-                return make_character('\n');
-            }
-            break;
+    case EOF:
+        fprintf(stderr, "incomplete character literal\n");
+        exit(1);
+    case 's':
+        if (peek(in) == 'p') {
+            eat_expected_string(in, "pace");
+            peek_expected_delimiter(in);
+            return make_character(' ');
+        }
+        break;
+    case 'n':
+        if (peek(in) == 'e') {
+            eat_expected_string(in, "ewline");
+            peek_expected_delimiter(in);
+            return make_character('\n');
+        }
+        break;
     }
     peek_expected_delimiter(in);
     return make_character(c);
 }
 
+//TODO: change this function to Objective-C style
+//RSObject* read_pair(NSFileHandle* in)
+//{
+//    int c;
+//    object* car_obj;
+//    object* cdr_obj;
+//
+//    eat_whitespace(in);
+//
+//    c = getc(in);
+//    if (c == ')') { /* read the empty list */
+//        return the_empty_list;
+//    }
+//    ungetc(c, in);
+//
+//    car_obj = read(in);
+//
+//    eat_whitespace(in);
+//
+//    c = getc(in);
+//    if (c == '.') { /* read improper list */
+//        c = peek(in);
+//        if (!is_delimiter(c)) {
+//            fprintf(stderr, "dot not followed by delimiter\n");
+//            exit(1);
+//        }
+//        cdr_obj = read(in);
+//        eat_whitespace(in);
+//        c = getc(in);
+//        if (c != ')') {
+//            fprintf(stderr,
+//                    "where was the trailing right paren?\n");
+//            exit(1);
+//        }
+//        return cons(car_obj, cdr_obj);
+//    }
+//    else { /* read list */
+//        ungetc(c, in);
+//        cdr_obj = read_pair(in);
+//        return cons(car_obj, cdr_obj);
+//    }
+//}
+//TODO: change this function to Objective-C style
+//RSObject* _read(NSFileHandle* in)
+//{
+//    int c;
+//    short sign = 1;
+//    int i;
+//    long num = 0;
+//#define BUFFER_MAX 1000
+//    char buffer[BUFFER_MAX];
+//
+//    eat_whitespace(in);
+//
+//    c = getc(in);
+//
+//    if (c == '#') { /* read a boolean or character */
+//        c = getc(in);
+//        switch (c) {
+//        case 't':
+//            return true;
+//        case 'f':
+//            return false;
+//        case '\\':
+//            return read_character(in);
+//        default:
+//            fprintf(stderr,
+//                    "unknown boolean or character literal\n");
+//            exit(1);
+//        }
+//    }
+//    else if (isdigit(c) || (c == '-' && (isdigit(peek(in))))) {
+//        /* read a fixnum */
+//        if (c == '-') {
+//            sign = -1;
+//        }
+//        else {
+//            ungetc(c, in);
+//        }
+//        while (isdigit(c = getc(in))) {
+//            num = (num * 10) + (c - '0');
+//        }
+//        num *= sign;
+//        if (is_delimiter(c)) {
+//            ungetc(c, in);
+//            return make_fixnum(num);
+//        }
+//        else {
+//            fprintf(stderr, "number not followed by delimiter\n");
+//            exit(1);
+//        }
+//    }
+//    else if (is_initial(c) || ((c == '+' || c == '-') && is_delimiter(peek(in)))) { /* read a symbol */
+//        i = 0;
+//        while (is_initial(c) || isdigit(c) || c == '+' || c == '-') {
+//            /* subtract 1 to save space for '\0' terminator */
+//            if (i < BUFFER_MAX - 1) {
+//                buffer[i++] = c;
+//            }
+//            else {
+//                fprintf(stderr, "symbol too long. "
+//                                "Maximum length is %d\n",
+//                        BUFFER_MAX);
+//                exit(1);
+//            }
+//            c = getc(in);
+//        }
+//        if (is_delimiter(c)) {
+//            buffer[i] = '\0';
+//            ungetc(c, in);
+//            return make_symbol(buffer);
+//        }
+//        else {
+//            fprintf(stderr, "symbol not followed by delimiter. "
+//                            "Found '%c'\n",
+//                    c);
+//            exit(1);
+//        }
+//    }
+//    else if (c == '"') { /* read a string */
+//        i = 0;
+//        while ((c = getc(in)) != '"') {
+//            if (c == '\\') {
+//                c = getc(in);
+//                if (c == 'n') {
+//                    c = '\n';
+//                }
+//            }
+//            if (c == EOF) {
+//                fprintf(stderr, "non-terminated string literal\n");
+//                exit(1);
+//            }
+//            /* subtract 1 to save space for '\0' terminator */
+//            if (i < BUFFER_MAX - 1) {
+//                buffer[i++] = c;
+//            }
+//            else {
+//                fprintf(stderr,
+//                        "string too long. Maximum length is %d\n",
+//                        BUFFER_MAX);
+//                exit(1);
+//            }
+//        }
+//        buffer[i] = '\0';
+//        return make_string(buffer);
+//    }
+//    else if (c == '(') { /* read the empty list or pair */
+//        return read_pair(in);
+//    }
+//    else if (c == '\'') { /* read quoted expression */
+//        return cons(quote_symbol, cons(read(in), the_empty_list));
+//    }
+//    else if (c == EOF) {
+//        return NULL;
+//    }
+//    else {
+//        fprintf(stderr, "bad input. Unexpected '%c'\n", c);
+//        exit(1);
+//    }
+//    fprintf(stderr, "read illegal state\n");
+//    exit(1);
+//}
 
-//TODO:
-RSObject *read_pair(FILE *in);
-//TODO:
-RSObject *_read(FILE *in) ;
-
-char is_self_evaluating(RSObject *exp) {
-    return is_boolean(exp)   ||
-    is_fixnum(exp)    ||
-    is_character(exp) ||
-    is_string(exp);
+char is_self_evaluating(RSObject* exp)
+{
+    return is_boolean(exp) || is_fixnum(exp) || is_character(exp) || is_string(exp);
 }
 
-char is_variable(RSObject *expression) {
+char is_variable(RSObject* expression)
+{
     return is_symbol(expression);
 }
 
-char is_tagged_list(RSObject *expression, RSObject *tag) {
-    RSObject *the_car;
-    
+char is_tagged_list(RSObject* expression, RSObject* tag)
+{
+    RSObject* the_car;
+
     if (is_pair(expression)) {
         the_car = car(expression);
         return is_symbol(the_car) && (the_car == tag);
@@ -928,31 +1148,38 @@ char is_tagged_list(RSObject *expression, RSObject *tag) {
     return 0;
 }
 
-char is_quoted(RSObject *expression) {
+char is_quoted(RSObject* expression)
+{
     return is_tagged_list(expression, quote_symbol);
 }
 
-RSObject *text_of_quotation(RSObject *exp) {
+RSObject* text_of_quotation(RSObject* exp)
+{
     return cadr(exp);
 }
 
-char is_assignment(RSObject *exp) {
+char is_assignment(RSObject* exp)
+{
     return is_tagged_list(exp, set_symbol);
 }
 
-RSObject *assignment_variable(RSObject *exp) {
+RSObject* assignment_variable(RSObject* exp)
+{
     return car(cdr(exp));
 }
 
-RSObject *assignment_value(RSObject *exp) {
+RSObject* assignment_value(RSObject* exp)
+{
     return car(cdr(cdr(exp)));
 }
 
-char is_definition(RSObject *exp) {
+char is_definition(RSObject* exp)
+{
     return is_tagged_list(exp, define_symbol);
 }
 
-RSObject *definition_variable(RSObject *exp) {
+RSObject* definition_variable(RSObject* exp)
+{
     if (is_symbol(cadr(exp))) {
         return cadr(exp);
     }
@@ -961,9 +1188,10 @@ RSObject *definition_variable(RSObject *exp) {
     }
 }
 
-RSObject *make_lambda(RSObject *parameters, RSObject *body);
+RSObject* make_lambda(RSObject* parameters, RSObject* body);
 
-RSObject *definition_value(RSObject *exp) {
+RSObject* definition_value(RSObject* exp)
+{
     if (is_symbol(cadr(exp))) {
         return caddr(exp);
     }
@@ -972,27 +1200,32 @@ RSObject *definition_value(RSObject *exp) {
     }
 }
 
-RSObject *make_if(RSObject *predicate, RSObject *consequent,
-                  RSObject *alternative) {
+RSObject* make_if(RSObject* predicate, RSObject* consequent,
+                  RSObject* alternative)
+{
     return cons(if_symbol,
                 cons(predicate,
                      cons(consequent,
                           cons(alternative, the_empty_list))));
 }
 
-char is_if(RSObject *expression) {
+char is_if(RSObject* expression)
+{
     return is_tagged_list(expression, if_symbol);
 }
 
-RSObject *if_predicate(RSObject *exp) {
+RSObject* if_predicate(RSObject* exp)
+{
     return cadr(exp);
 }
 
-RSObject *if_consequent(RSObject *exp) {
+RSObject* if_consequent(RSObject* exp)
+{
     return caddr(exp);
 }
 
-RSObject *if_alternative(RSObject *exp) {
+RSObject* if_alternative(RSObject* exp)
+{
     if (is_the_empty_list(cdddr(exp))) {
         return false;
     }
@@ -1001,67 +1234,83 @@ RSObject *if_alternative(RSObject *exp) {
     }
 }
 
-RSObject *make_lambda(RSObject *parameters, RSObject *body) {
+RSObject* make_lambda(RSObject* parameters, RSObject* body)
+{
     return cons(lambda_symbol, cons(parameters, body));
 }
 
-char is_lambda(RSObject *exp) {
+char is_lambda(RSObject* exp)
+{
     return is_tagged_list(exp, lambda_symbol);
 }
 
-RSObject *lambda_parameters(RSObject *exp) {
+RSObject* lambda_parameters(RSObject* exp)
+{
     return cadr(exp);
 }
 
-RSObject *lambda_body(RSObject *exp) {
+RSObject* lambda_body(RSObject* exp)
+{
     return cddr(exp);
 }
 
-RSObject *make_begin(RSObject *seq) {
+RSObject* make_begin(RSObject* seq)
+{
     return cons(begin_symbol, seq);
 }
 
-char is_begin(RSObject *exp) {
+char is_begin(RSObject* exp)
+{
     return is_tagged_list(exp, begin_symbol);
 }
 
-RSObject *begin_actions(RSObject *exp) {
+RSObject* begin_actions(RSObject* exp)
+{
     return cdr(exp);
 }
 
-char is_last_exp(RSObject *seq) {
+char is_last_exp(RSObject* seq)
+{
     return is_the_empty_list(cdr(seq));
 }
 
-RSObject *first_exp(RSObject *seq) {
+RSObject* first_exp(RSObject* seq)
+{
     return car(seq);
 }
 
-RSObject *rest_exps(RSObject *seq) {
+RSObject* rest_exps(RSObject* seq)
+{
     return cdr(seq);
 }
 
-char is_cond(RSObject *exp) {
+char is_cond(RSObject* exp)
+{
     return is_tagged_list(exp, cond_symbol);
 }
 
-RSObject *cond_clauses(RSObject *exp) {
+RSObject* cond_clauses(RSObject* exp)
+{
     return cdr(exp);
 }
 
-RSObject *cond_predicate(RSObject *clause) {
+RSObject* cond_predicate(RSObject* clause)
+{
     return car(clause);
 }
 
-RSObject *cond_actions(RSObject *clause) {
+RSObject* cond_actions(RSObject* clause)
+{
     return cdr(clause);
 }
 
-char is_cond_else_clause(RSObject *clause) {
+char is_cond_else_clause(RSObject* clause)
+{
     return cond_predicate(clause) == else_symbol;
 }
 
-RSObject *sequence_to_exp(RSObject *seq) {
+RSObject* sequence_to_exp(RSObject* seq)
+{
     if (is_the_empty_list(seq)) {
         return seq;
     }
@@ -1073,16 +1322,17 @@ RSObject *sequence_to_exp(RSObject *seq) {
     }
 }
 
-RSObject *expand_clauses(RSObject *clauses) {
-    RSObject *first;
-    RSObject *rest;
-    
+RSObject* expand_clauses(RSObject* clauses)
+{
+    RSObject* first;
+    RSObject* rest;
+
     if (is_the_empty_list(clauses)) {
         return false;
     }
     else {
         first = car(clauses);
-        rest  = cdr(clauses);
+        rest = cdr(clauses);
         if (is_cond_else_clause(first)) {
             if (is_the_empty_list(rest)) {
                 return sequence_to_exp(cond_actions(first));
@@ -1100,108 +1350,128 @@ RSObject *expand_clauses(RSObject *clauses) {
     }
 }
 
-RSObject *cond_to_if(RSObject *exp) {
+RSObject* cond_to_if(RSObject* exp)
+{
     return expand_clauses(cond_clauses(exp));
 }
 
-RSObject *make_application(RSObject *operator, RSObject *operands) {
+RSObject* make_application(RSObject* operator, RSObject* operands)
+{
     return cons(operator, operands);
 }
 
-char is_application(RSObject *exp) {
+char is_application(RSObject* exp)
+{
     return is_pair(exp);
 }
 
-RSObject *operator(RSObject *exp) {
+RSObject* operator(RSObject* exp)
+{
     return car(exp);
 }
 
-RSObject *operands(RSObject *exp) {
+RSObject* operands(RSObject* exp)
+{
     return cdr(exp);
 }
 
-char is_no_operands(RSObject *ops) {
+char is_no_operands(RSObject* ops)
+{
     return is_the_empty_list(ops);
 }
 
-RSObject *first_operand(RSObject *ops) {
+RSObject* first_operand(RSObject* ops)
+{
     return car(ops);
 }
 
-RSObject *rest_operands(RSObject *ops) {
+RSObject* rest_operands(RSObject* ops)
+{
     return cdr(ops);
 }
 
-char is_let(RSObject *exp) {
+char is_let(RSObject* exp)
+{
     return is_tagged_list(exp, let_symbol);
 }
 
-RSObject *let_bindings(RSObject *exp) {
+RSObject* let_bindings(RSObject* exp)
+{
     return cadr(exp);
 }
 
-RSObject *let_body(RSObject *exp) {
+RSObject* let_body(RSObject* exp)
+{
     return cddr(exp);
 }
 
-RSObject *binding_parameter(RSObject *binding) {
+RSObject* binding_parameter(RSObject* binding)
+{
     return car(binding);
 }
 
-RSObject *binding_argument(RSObject *binding) {
+RSObject* binding_argument(RSObject* binding)
+{
     return cadr(binding);
 }
 
-RSObject *bindings_parameters(RSObject *bindings) {
-    return is_the_empty_list(bindings) ?
-    the_empty_list :
-    cons(binding_parameter(car(bindings)),
-         bindings_parameters(cdr(bindings)));
+RSObject* bindings_parameters(RSObject* bindings)
+{
+    return is_the_empty_list(bindings) ? the_empty_list : cons(binding_parameter(car(bindings)),
+                                                               bindings_parameters(cdr(bindings)));
 }
 
-RSObject *bindings_arguments(RSObject *bindings) {
-    return is_the_empty_list(bindings) ?
-    the_empty_list :
-    cons(binding_argument(car(bindings)),
-         bindings_arguments(cdr(bindings)));
+RSObject* bindings_arguments(RSObject* bindings)
+{
+    return is_the_empty_list(bindings) ? the_empty_list : cons(binding_argument(car(bindings)),
+                                                               bindings_arguments(cdr(bindings)));
 }
 
-RSObject *let_parameters(RSObject *exp) {
+RSObject* let_parameters(RSObject* exp)
+{
     return bindings_parameters(let_bindings(exp));
 }
 
-RSObject *let_arguments(RSObject *exp) {
+RSObject* let_arguments(RSObject* exp)
+{
     return bindings_arguments(let_bindings(exp));
 }
 
-RSObject *let_to_application(RSObject *exp) {
+RSObject* let_to_application(RSObject* exp)
+{
     return make_application(
-                            make_lambda(let_parameters(exp),
-                                        let_body(exp)),
-                            let_arguments(exp));
+        make_lambda(let_parameters(exp),
+                    let_body(exp)),
+        let_arguments(exp));
 }
 
-char is_and(RSObject *exp) {
+char is_and(RSObject* exp)
+{
     return is_tagged_list(exp, and_symbol);
 }
 
-RSObject *and_tests(RSObject *exp) {
+RSObject* and_tests(RSObject* exp)
+{
     return cdr(exp);
 }
 
-char is_or(RSObject *exp) {
+char is_or(RSObject* exp)
+{
     return is_tagged_list(exp, or_symbol);
 }
 
-RSObject *or_tests(RSObject *exp) {
+RSObject* or_tests(RSObject* exp)
+{
     return cdr(exp);
 }
 
-RSObject *apply_operator(RSObject *arguments) {
+RSObject* apply_operator(RSObject* arguments)
+{
     return car(arguments);
 }
 
-RSObject *prepare_apply_operands(RSObject *arguments) {
+RSObject* prepare_apply_operands(RSObject* arguments)
+{
     if (is_the_empty_list(cdr(arguments))) {
         return car(arguments);
     }
@@ -1211,19 +1481,23 @@ RSObject *prepare_apply_operands(RSObject *arguments) {
     }
 }
 
-RSObject *apply_operands(RSObject *arguments) {
+RSObject* apply_operands(RSObject* arguments)
+{
     return prepare_apply_operands(cdr(arguments));
 }
 
-RSObject *eval_expression(RSObject *arguments) {
+RSObject* eval_expression(RSObject* arguments)
+{
     return car(arguments);
 }
 
-RSObject *eval_environment(RSObject *arguments) {
+RSObject* eval_environment(RSObject* arguments)
+{
     return cadr(arguments);
 }
 
-RSObject *list_of_values(RSObject *exps, RSObject *env) {
+RSObject* list_of_values(RSObject* exps, RSObject* env)
+{
     if (is_no_operands(exps)) {
         return the_empty_list;
     }
@@ -1233,25 +1507,28 @@ RSObject *list_of_values(RSObject *exps, RSObject *env) {
     }
 }
 
-RSObject *eval_assignment(RSObject *exp, RSObject *env) {
+RSObject* eval_assignment(RSObject* exp, RSObject* env)
+{
     set_variable_value(assignment_variable(exp),
                        eval(assignment_value(exp), env),
                        env);
     return ok_symbol;
 }
 
-RSObject *eval_definition(RSObject *exp, RSObject *env) {
+RSObject* eval_definition(RSObject* exp, RSObject* env)
+{
     define_variable(definition_variable(exp),
                     eval(definition_value(exp), env),
                     env);
     return ok_symbol;
 }
 
-RSObject *eval(RSObject *exp, RSObject *env) {
-    RSObject *procedure;
-    RSObject *arguments;
-    RSObject *result;
-    
+RSObject* eval(RSObject* exp, RSObject* env)
+{
+    RSObject* procedure;
+    RSObject* arguments;
+    RSObject* result;
+
 tailcall:
     if (is_self_evaluating(exp)) {
         return exp;
@@ -1269,9 +1546,7 @@ tailcall:
         return eval_definition(exp, env);
     }
     else if (is_if(exp)) {
-        exp = is_true(eval(if_predicate(exp), env)) ?
-        if_consequent(exp) :
-        if_alternative(exp);
+        exp = is_true(eval(if_predicate(exp), env)) ? if_consequent(exp) : if_alternative(exp);
         goto tailcall;
     }
     else if (is_lambda(exp)) {
@@ -1329,30 +1604,28 @@ tailcall:
     else if (is_application(exp)) {
         procedure = eval(operator(exp), env);
         arguments = list_of_values(operands(exp), env);
-        
+
         /* handle eval specially for tail call requirement */
-        if (is_primitive_proc(procedure) &&
-            procedure.data.primitive_proc.fn == eval_proc) {
+        if (is_primitive_proc(procedure) && procedure.data.primitive_proc.fn == eval_proc) {
             exp = eval_expression(arguments);
             env = eval_environment(arguments);
             goto tailcall;
         }
-        
+
         /* handle apply specially for tail call requirement */
-        if (is_primitive_proc(procedure) &&
-            procedure.data.primitive_proc.fn == apply_proc) {
+        if (is_primitive_proc(procedure) && procedure.data.primitive_proc.fn == apply_proc) {
             procedure = apply_operator(arguments);
             arguments = apply_operands(arguments);
         }
-        
+
         if (is_primitive_proc(procedure)) {
             return (procedure.data.primitive_proc.fn)(arguments);
         }
         else if (is_compound_proc(procedure)) {
             env = extend_environment(
-                                     procedure.data.compound_proc.parameters,
-                                     arguments,
-                                     procedure.data.compound_proc.env);
+                procedure.data.compound_proc.parameters,
+                arguments,
+                procedure.data.compound_proc.env);
             exp = make_begin(procedure.data.compound_proc.body);
             goto tailcall;
         }
@@ -1370,20 +1643,115 @@ tailcall:
 }
 
 /**************************** PRINT ******************************/
-//TODO:
-void write_pair(FILE *out, RSObject *pair) ;
-//TODO:
-void _write(FILE *out, RSObject *obj) ;
+//TODO:Change this funcion to Objective-C style
+//void write_pair(NSFileHandle* out, RSObject* pair)
+//    object *car_obj;
+//    object *cdr_obj;
+//
+//    car_obj = car(pair);
+//    cdr_obj = cdr(pair);
+//    write(out, car_obj);
+//    if (cdr_obj->type == PAIR) {
+//        fprintf(out, " ");
+//        write_pair(out, cdr_obj);
+//    }
+//    else if (cdr_obj->type == THE_EMPTY_LIST) {
+//        return;
+//    }
+//    else {
+//        fprintf(out, " . ");
+//        write(out, cdr_obj);
+//    }
+//}
+
+//TODO: Change this funcion to Objective-C style
+//void write(NSFileHandle *out, object *obj) {
+//    char c;
+//    char *str;
+//
+//    switch (obj->type) {
+//        case THE_EMPTY_LIST:
+//            fprintf(out, "()");
+//            break;
+//        case BOOLEAN:
+//            fprintf(out, "#%c", is_false(obj) ? 'f' : 't');
+//            break;
+//        case SYMBOL:
+//            fprintf(out, "%s", obj->data.symbol.value);
+//            break;
+//        case FIXNUM:
+//            fprintf(out, "%ld", obj->data.fixnum.value);
+//            break;
+//        case CHARACTER:
+//            c = obj->data.character.value;
+//            fprintf(out, "#\\");
+//            switch (c) {
+//                case '\n':
+//                    fprintf(out, "newline");
+//                    break;
+//                case ' ':
+//                    fprintf(out, "space");
+//                    break;
+//                default:
+//                    putc(c, out);
+//            }
+//            break;
+//        case STRING:
+//            str = obj->data.string.value;
+//            putchar('"');
+//            while (*str != '\0') {
+//                switch (*str) {
+//                    case '\n':
+//                        fprintf(out, "\\n");
+//                        break;
+//                    case '\\':
+//                        fprintf(out, "\\\\");
+//                        break;
+//                    case '"':
+//                        fprintf(out, "\\\"");
+//                        break;
+//                    default:
+//                        putc(*str, out);
+//                }
+//                str++;
+//            }
+//            putchar('"');
+//            break;
+//        case PAIR:
+//            fprintf(out, "(");
+//            write_pair(out, obj);
+//            fprintf(out, ")");
+//            break;
+//        case PRIMITIVE_PROC:
+//            fprintf(out, "#<primitive-procedure>");
+//            break;
+//        case COMPOUND_PROC:
+//            fprintf(out, "#<compound-procedure>");
+//            break;
+//        case INPUT_PORT:
+//            fprintf(out, "#<input-port>");
+//            break;
+//        case OUTPUT_PORT:
+//            fprintf(out, "#<output-port>");
+//            break;
+//        case EOF_OBJECT:
+//            fprintf(out, "#<eof>");
+//            break;
+//        default:
+//            fprintf(stderr, "cannot write unknown type\n");
+//            exit(1);
+//    }
+//}
 /***************************** REPL ******************************/
 //
 //int main(void) {
 //    RSObject *exp;
-//    
+//
 //    printf("Welcome to Bootstrap Scheme. "
 //           "Use ctrl-c to exit.\n");
-//    
+//
 //    init();
-//    
+//
 //    while (1) {
 //        printf("> ");
 //        exp = read(stdin);
@@ -1393,8 +1761,8 @@ void _write(FILE *out, RSObject *obj) ;
 //        write(stdout, eval(exp, the_global_environment));
 //        printf("\n");
 //    }
-//    
+//
 //    printf("Goodbye\n");
-//    
+//
 //    return 0;
 //}
