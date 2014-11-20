@@ -704,7 +704,7 @@ RSObject* lookup_variable_value(RSObject* var, RSObject* env)
         }
         env = enclosing_environment(env);
     }
-    fprintf(stderr, "%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
+    NSLog(@"%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
     exit(1);
 }
 
@@ -728,7 +728,7 @@ void set_variable_value(RSObject* var, RSObject* val, RSObject* env)
         }
         env = enclosing_environment(env);
     }
-    fprintf(stderr, "%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
+    NSLog(@"%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
     exit(1);
 }
 
@@ -941,7 +941,7 @@ void eat_expected_string(FILE* in, char* str)
     while (*str != '\0') {
         c = getc(in);
         if (c != *str) {
-            fprintf(stderr, "unexpected character '%c'\n", c);
+            NSLog(@"unexpected character '%c'\n", c);
             exit(1);
         }
         str++;
@@ -951,7 +951,7 @@ void eat_expected_string(FILE* in, char* str)
 void peek_expected_delimiter(FILE* in)
 {
     if (!is_delimiter(peek(in))) {
-        fprintf(stderr, "character not followed by delimiter\n");
+        NSLog(@"character not followed by delimiter\n");
         exit(1);
     }
 }
@@ -963,7 +963,7 @@ RSObject* read_character(FILE* in)
     c = getc(in);
     switch (c) {
     case EOF:
-        fprintf(stderr, "incomplete character literal\n");
+        NSLog(@ "incomplete character literal\n");
         exit(1);
     case 's':
         if (peek(in) == 'p') {
@@ -1051,7 +1051,7 @@ RSObject* read_pair(NSFileHandle* in)
     if (c == '.'){ // read improper list
         c = [in peek];
         if (!is_delimiter(c)){
-            fprintf(stderr, "dot not followed by delimiter\n");
+            NSLog(@"dot not followed by delimiter\n");
             exit(1);
         }
         car_obj = _read(in);
@@ -1059,7 +1059,7 @@ RSObject* read_pair(NSFileHandle* in)
         eat_whitespace(in);
         c = [in getc];
         if (c != ')'){
-            fprintf(stderr, "where was the trailing right paren?\n");
+            NSLog(@"where was the trailing right paren?\n");
             exit(1);
         }
         return cons(car_obj, cdr_obj);
@@ -1219,8 +1219,7 @@ RSObject* _read(NSFileHandle* in)
                 //return read_character((__bridge FILE *)(in));
                 return THE_EMPTY_LIST;
             default:
-                fprintf(stderr,
-                        "unknown boolean or character literal\n");
+                NSLog(@"unknown boolean or character literal\n");
                         exit(1);
         }
     }
@@ -1240,7 +1239,7 @@ RSObject* _read(NSFileHandle* in)
             return make_fixnum(num);
         }
         else{
-            fprintf(stderr, "number not followed by delimiter\n");
+            NSLog(@"number not followed by delimiter\n");
             exit(1);
         }
     }
@@ -1253,7 +1252,7 @@ RSObject* _read(NSFileHandle* in)
                 i++;
             }
             else{
-                fprintf(stderr, "symbol too long. ""Maximum length is %d\n", BUFFER_MAX);
+                NSLog(@"symbol too long. ""Maximum length is %d\n", BUFFER_MAX);
                 exit(1);
             }
             c = [in getc];
@@ -1263,7 +1262,7 @@ RSObject* _read(NSFileHandle* in)
             return make_symbol([buffer copy]);
         }
         else{
-            fprintf(stderr, "symbol not followed by delimiter. "
+            NSLog(@"symbol not followed by delimiter. "
                     "Found %c\n", c);
             exit(1);
         }
@@ -1278,7 +1277,7 @@ RSObject* _read(NSFileHandle* in)
                 }
             }
             if (c == EOF){
-                fprintf(stderr, "non-terminated string literal\n");
+                NSLog(@"non-terminated string literal\n");
                 exit(1);
             }
             // sub 1 to save space for '\0'
@@ -1287,7 +1286,7 @@ RSObject* _read(NSFileHandle* in)
                 i++;
             }
             else{
-                fprintf(stderr, "symbol too long. ""Maximum length is %d\n", BUFFER_MAX);
+                NSLog(@"symbol too long. ""Maximum length is %d\n", BUFFER_MAX);
                 exit(1);
             }
         }
@@ -1303,10 +1302,10 @@ RSObject* _read(NSFileHandle* in)
         return NULL;
     }
     else {
-        fprintf(stderr, "bad input. Unexpected '%c'\n", c);
+        NSLog(@"bad input. Unexpected '%c'\n", c);
         exit(1);
     }
-    fprintf(stderr, "read illegal state\n");
+    NSLog(@"read illegal state\n");
     exit(1);
 }
 
@@ -1521,7 +1520,7 @@ RSObject* expand_clauses(RSObject* clauses)
                 return sequence_to_exp(cond_actions(first));
             }
             else {
-                fprintf(stderr, "else clause isn't last cond.if");
+                NSLog(@ "else clause isn't last cond.if");
                 exit(1);
             }
         }
@@ -1813,15 +1812,15 @@ tailcall:
             goto tailcall;
         }
         else {
-            fprintf(stderr, "unknown procedure type\n");
+            NSLog(@"unknown procedure type\n");
             exit(1);
         }
     }
     else {
-        fprintf(stderr, "cannot eval unknown expression type\n");
+        NSLog(@"cannot eval unknown expression type\n");
         exit(1);
     }
-    fprintf(stderr, "eval illegal state\n");
+    NSLog(@"eval illegal state\n");
     exit(1);
 }
 
@@ -2012,7 +2011,7 @@ void write_RSObject(NSFileHandle* out, RSObject* obj)
             [out printString:@"#<compound-procedure>"];
             break;
         default:
-            fprintf(stderr, "cannot write unknown type\n");
+            NSLog(@"cannot write unknown type\n");
             exit(1);
     }
 }
