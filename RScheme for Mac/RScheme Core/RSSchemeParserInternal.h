@@ -28,6 +28,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "NSFileHandle+withGetc.h"
+
 
 @class RSObject;
 
@@ -896,20 +898,38 @@ int peek(FILE* in)
     return c;
 }
 
-void eat_whitespace(FILE* in)
+
+//void eat_whitespace(FILE* in)
+//{
+//    int c;
+//
+//    while ((c = getc(in)) != EOF) {
+//        if (isspace(c)) {
+//            continue;
+//        }
+//        else if (c == ';') { /* comments are whitespace also */
+//            while (((c = getc(in)) != EOF) && (c != '\n'))
+//                ;
+//            continue;
+//        }
+//        ungetc(c, in);
+//        break;
+//    }
+//}
+
+void eat_whitespace(NSFileHandle *in)
 {
     int c;
-
-    while ((c = getc(in)) != EOF) {
-        if (isspace(c)) {
+    
+    while ((c = [in getc]) != EOF) {
+        if (isspace(c)){
             continue;
         }
-        else if (c == ';') { /* comments are whitespace also */
-            while (((c = getc(in)) != EOF) && (c != '\n'))
-                ;
+        else if (c == ';'){ // comments are whitespace alse
+            while (((c = [in getc]) != EOF) && (c != '\n'));
             continue;
         }
-        ungetc(c, in);
+        [in ungetc:c];
         break;
     }
 }
@@ -1006,6 +1026,51 @@ RSObject* read_character(FILE* in)
 //        return cons(car_obj, cdr_obj);
 //    }
 //}
+
+RSObject* read_pair(NSFileHandle* in)
+{
+    int c;
+    RSObject* car_obj;
+    RSObject* cdr_obj;
+    
+    //[in eatWhiteSpace];
+    eat_whitespace(in);
+    
+    c = [in getc];
+    if (c == ')'){ //read the empty list
+        return the_empty_list;
+    }
+    [in ungetc:c];
+    
+    car_obj = _read(in);
+    
+    //[in eatWhiteSpace];
+    eat_whitespace(in);
+    
+    c = [in getc];
+    if (c == '.'){ // read improper list
+        c = [in peek];
+        if (!is_delimiter(c)){
+            fprintf(stderr, "dot not followed by delimiter\n");
+            exit(1);
+        }
+        car_obj = _read(in);
+        //[in eatWhiteSpace];
+        eat_whitespace(in);
+        c = [in getc];
+        if (c != ')'){
+            fprintf(stderr, "where was the trailing right paren?\n");
+            exit(1);
+        }
+        return cons(car_obj, cdr_obj);
+    }
+    else{ // read list
+        [in ungetc:c];
+        cdr_obj = read_pair(in);
+        return cons(car_obj, cdr_obj);
+    }
+}
+
 //TODO: change this function to Objective-C style
 //RSObject* _read(NSFileHandle* in)
 //{
@@ -1126,6 +1191,124 @@ RSObject* read_character(FILE* in)
 //    fprintf(stderr, "read illegal state\n");
 //    exit(1);
 //}
+
+RSObject* _read(NSFileHandle* in)
+{
+    int c;
+    short sign = 1;
+    int i;
+    long num = 0;
+
+#define BUFFER_MAX 1000
+    NSMutableString *buffer = [[NSMutableString alloc] init];
+    
+    //[in eatWhiteSpace];
+    eat_whitespace(in);
+    
+    c = [in getc];
+    
+    if (c == '#'){ // read a boolean or character
+        c = [in getc];
+        switch (c){
+            case 't':
+                return true_value;
+            case 'f':
+                return false_value;
+            case '\\':
+//TODO: implemented read_character function in objective c style
+                //return read_character((__bridge FILE *)(in));
+                return THE_EMPTY_LIST;
+            default:
+                fprintf(stderr,
+                        "unknown boolean or character literal\n");
+                        exit(1);
+        }
+    }
+    else if (isdigit(c) || (c == '-' && isdigit([in peek]))){
+        if (c == '-'){
+            sign = -1;
+        }
+        else{
+            [in ungetc:c];
+        }
+        while (isdigit(c = [in getc])) {
+            num = (num * 10) + (c - '0');
+        }
+        num *= sign;
+        if (is_delimiter(c)){
+            [in ungetc:c];
+            return make_fixnum(num);
+        }
+        else{
+            fprintf(stderr, "number not followed by delimiter\n");
+            exit(1);
+        }
+    }
+    else if (is_initial(c) || ((c == '+' || c == '-') && is_delimiter([in peek]))){ // read a symbol
+        i = 0;
+        while (is_initial(c) || isdigit(c) || c == '+' || c == '-'){
+            // sub 1 to save space for '\0' // is it neccessary?
+            if (i < BUFFER_MAX - 1){
+                [buffer appendFormat:@"%c", c];
+                i++;
+            }
+            else{
+                fprintf(stderr, "symbol too long. ""Maximum length is %d\n", BUFFER_MAX);
+                exit(1);
+            }
+            c = [in getc];
+        }
+        if (is_delimiter(c)){
+            [in ungetc:c];
+            return make_symbol([buffer copy]);
+        }
+        else{
+            fprintf(stderr, "symbol not followed by delimiter. "
+                    "Found %c\n", c);
+            exit(1);
+        }
+    }
+    else if (c == '"'){ // read a string
+        i = 0;
+        while ((c = [in getc]) != '"') {
+            if (c == '\\'){
+                c = [in getc];
+                if (c == 'n') {
+                    c = '\n';
+                }
+            }
+            if (c == EOF){
+                fprintf(stderr, "non-terminated string literal\n");
+                exit(1);
+            }
+            // sub 1 to save space for '\0'
+            if (i < BUFFER_MAX -1){
+                [buffer appendFormat:@"%c", c];
+                i++;
+            }
+            else{
+                fprintf(stderr, "symbol too long. ""Maximum length is %d\n", BUFFER_MAX);
+                exit(1);
+            }
+        }
+        return make_string([buffer copy]);
+    }
+    else if (c == '('){ // read the empty list or pair
+        return read_pair(in);
+    }
+    else if (c == '\''){ // read quoted expression
+        return cons(quote_symbol, cons(_read(in), the_empty_list));
+    }
+    else if (c == EOF){
+        return NULL;
+    }
+    else {
+        fprintf(stderr, "bad input. Unexpected '%c'\n", c);
+        exit(1);
+    }
+    fprintf(stderr, "read illegal state\n");
+    exit(1);
+}
 
 char is_self_evaluating(RSObject* exp)
 {
@@ -1664,6 +1847,27 @@ tailcall:
 //    }
 //}
 
+void write_pair(NSFileHandle* out, RSObject* pair)
+{
+    RSObject* car_obj = car(pair);
+    RSObject* cdr_obj = cdr(pair);
+    
+    write_RSObject(out, car_obj);
+    if (cdr_obj.type == PAIR){
+        //[out writeData:[NSData dataWithBytes:" " length:1]];
+        [out printString:@" "];
+        write_pair(out, cdr_obj);
+    }
+    else if (cdr_obj.type == THE_EMPTY_LIST){
+        return;
+    }
+    else{
+        //[out writeData:[NSData dataWithBytes:"." length:1]];
+        [out printString:@"."];
+        write_RSObject(out, cdr_obj);
+    }
+}
+
 //TODO: Change this funcion to Objective-C style
 //void write(NSFileHandle *out, object *obj) {
 //    char c;
@@ -1742,6 +1946,77 @@ tailcall:
 //            exit(1);
 //    }
 //}
+
+void write_RSObject(NSFileHandle* out, RSObject* obj)
+{
+    char c;
+    NSString *str = [[NSString alloc] init];
+    
+    switch (obj.type){
+        case THE_EMPTY_LIST:
+            [out printString:@"()"];
+            break;
+        case BOOLEAN:
+            [out printString:[NSString stringWithFormat:@"#%c", is_false(obj) ? 'f' : 't']];
+            break;
+        case SYMBOL:
+            [out printString:obj.data.symbol.value];
+            break;
+        case FIXNUM:
+            [out printString:[NSString stringWithFormat:@"%ld", obj.data.fixnum.value]];
+            break;
+        case CHARACTER:
+            c = [obj.data.character.value characterAtIndex:0];
+            [out printString:@"#\\"];
+            switch (c) {
+                case '\n':
+                    [out printString:@"newline"];
+                    break;
+                case ' ':
+                    [out printString:@"space"];
+                    break;
+                default:
+                    [out printString:[NSString stringWithFormat:@"%c", c]];
+            }
+            break;
+        case STRING:
+            str = obj.data.string.value;
+            [out printString:[NSString stringWithFormat:@"%c", '"']];
+            for (int i = 0; i < str.length; i++){
+                switch (c = [str characterAtIndex:i]) {
+                    case '\n':
+                        [out printString:@"\n"];
+                        break;
+                    case '\\':
+                        [out printString:@"\\\\"];
+                        break;
+                    case '"':
+                        [out printString:@"\\\""];
+                        break;
+                    default:
+                        [out printString:[NSString stringWithFormat:@"%c", c]];
+                        break;
+                }
+            }
+            [out printString:[NSString stringWithFormat:@"%c", '"']];
+            break;
+        case PAIR:
+            [out printString:@"("];
+            write_pair(out, obj);
+            [out printString:@")"];
+            break;
+        case PRIMITIVE_PROC:
+            [out printString:@"#<primitive-procedure>"];
+            break;
+        case COMPOUND_PROC:
+            [out printString:@"#<compound-procedure>"];
+            break;
+        default:
+            fprintf(stderr, "cannot write unknown type\n");
+            exit(1);
+    }
+}
+
 /***************************** REPL ******************************/
 //
 //int main(void) {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C22EC321A1E38A100C5B0A0 /* NSFileHandle+withGetc.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C22EC311A1E38A100C5B0A0 /* NSFileHandle+withGetc.m */; };
 		8C42F31B1A04DD0C002F7463 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F31A1A04DD0C002F7463 /* AppDelegate.m */; };
 		8C42F31D1A04DD0C002F7463 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F31C1A04DD0C002F7463 /* main.m */; };
 		8C42F3201A04DD0C002F7463 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F31F1A04DD0C002F7463 /* ViewController.m */; };
@@ -30,6 +31,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7C22EC301A1E38A100C5B0A0 /* NSFileHandle+withGetc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileHandle+withGetc.h"; sourceTree = "<group>"; };
+		7C22EC311A1E38A100C5B0A0 /* NSFileHandle+withGetc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileHandle+withGetc.m"; sourceTree = "<group>"; };
 		8C42F3141A04DD0C002F7463 /* RScheme for Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RScheme for Mac.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C42F3181A04DD0C002F7463 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8C42F3191A04DD0C002F7463 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -136,6 +139,8 @@
 				8C42F33F1A04F943002F7463 /* RSchemeParser.m */,
 				8C42F3431A050D7B002F7463 /* RSSchemeParserInternal.h */,
 				8C42F3441A050D7B002F7463 /* RSSchemeParserInternal.m */,
+				7C22EC301A1E38A100C5B0A0 /* NSFileHandle+withGetc.h */,
+				7C22EC311A1E38A100C5B0A0 /* NSFileHandle+withGetc.m */,
 			);
 			name = "RScheme Core";
 			sourceTree = "<group>";
@@ -240,6 +245,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8C42F3201A04DD0C002F7463 /* ViewController.m in Sources */,
+				7C22EC321A1E38A100C5B0A0 /* NSFileHandle+withGetc.m in Sources */,
 				8C42F31D1A04DD0C002F7463 /* main.m in Sources */,
 				8C42F33E1A04DD61002F7463 /* tokenizer.lm in Sources */,
 				8C42F33C1A04DD46002F7463 /* parser.ym in Sources */,
@@ -432,6 +438,7 @@
 				8C42F3361A04DD0C002F7463 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8C42F3371A04DD0C002F7463 /* Build configuration list for PBXNativeTarget "RScheme for MacTests" */ = {
 			isa = XCConfigurationList;
@@ -440,6 +447,7 @@
 				8C42F3391A04DD0C002F7463 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
