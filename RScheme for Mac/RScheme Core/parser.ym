@@ -1,7 +1,6 @@
 %{
     
     #import "MessageBlocks.h"
-    #import "RSSchemeParserInternal.h"
     
     int yylex(void);
     void yyerror(char *s);

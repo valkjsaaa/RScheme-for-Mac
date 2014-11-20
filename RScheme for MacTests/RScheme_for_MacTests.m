@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
+#import "RSchemeParser.h"
 
 @interface RScheme_for_MacTests : XCTestCase
 
@@ -27,6 +28,9 @@
 
 - (void)testExample {
     // This is an example of a functional test case.
+    NSFileHandle * output = [NSFileHandle fileHandleWithStandardOutput];
+    RSchemeParser * parser = [[RSchemeParser alloc] initWithFileHandle:output];
+    [parser parse:@"(+ 2 1)" error:nil];
     XCTAssert(YES, @"Pass");
 }
 
