@@ -29,6 +29,8 @@
 
 #import "RSSchemeParserInternal.h"
 
+NSMutableString* standard_output;
+
 char is_the_empty_list(RSObject* obj)
 {
     return obj == the_empty_list;
@@ -428,17 +430,18 @@ RSObject* eval_proc(RSObject* arguments)
 RSObject* load_proc(RSObject* arguments)
 {
     NSString* filename;
-    NSFileHandle* in;
+    NSString* input;
     RSObject* exp;
     RSObject* result;
 
     filename = car(arguments).data.string.value;
-    in = [NSFileHandle fileHandleForReadingAtPath:filename];
-    if (in == nil) {
+    input = [NSString stringWithContentsOfFile:filename usedEncoding:nil error:nil];
+    if (input == nil) {
         NSLog(@"could not load file \"%@\"", filename);
         exit(1);
     }
-    while ((exp = _read(in)) != NULL) {
+
+    while ((exp = _read(input)) != NULL) {
         result = eval(exp, the_global_environment);
     }
     return result;
@@ -448,7 +451,7 @@ RSObject* load_proc(RSObject* arguments)
 RSObject* write_proc(RSObject* arguments)
 {
     RSObject* exp;
-    NSFileHandle* out;
+    NSMutableString* output;
 
     exp = car(arguments);
     arguments = cdr(arguments);
@@ -456,8 +459,8 @@ RSObject* write_proc(RSObject* arguments)
     //    stdout :
     //    car(arguments)->data.output_port.stream;
     //FIXME: only stdout supported!
-    out = [NSFileHandle fileHandleWithStandardOutput];
-    _write(out, exp);
+    output = standard_output;
+    _write(output, exp);
     return ok_symbol;
 }
 
@@ -465,8 +468,9 @@ RSObject* write_proc(RSObject* arguments)
 RSObject* error_proc(RSObject* arguments)
 {
     while (!is_the_empty_list(arguments)) {
-        NSFileHandle* stderr = [NSFileHandle fileHandleWithStandardError];
-        _write(stderr, car(arguments));
+        NSMutableString* error_string = [NSMutableString new];
+        _write(error_string, car(arguments));
+        NSLog(@"%@", error_string);
         arguments = cdr(arguments);
     };
     printf("\nexiting\n");
@@ -694,8 +698,10 @@ RSObject* make_environment(void)
     return env;
 }
 
-void init(void)
+void init(NSMutableString* output)
 {
+    standard_output = output;
+
     the_empty_list = [RSObject new];
     the_empty_list.type = THE_EMPTY_LIST;
 
@@ -753,22 +759,9 @@ int peek(FILE* in)
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
-void eat_whitespace(NSFileHandle* in)
+void eat_whitespace(NSMutableString* in)
 {
-    int c;
-
-    while ((c = [in getc]) != EOF) {
-        if (isspace(c)) {
-            continue;
-        }
-        else if (c == ';') { // comments are whitespace alse
-            while (((c = [in getc]) != EOF) && (c != '\n'))
-                ;
-            continue;
-        }
-        [in ungetc:c];
-        break;
-    }
+    in = [NSMutableString stringWithString:[in stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
 }
 
 void eat_expected_string(FILE* in, char* str)
@@ -794,7 +787,7 @@ void peek_expected_delimiter(FILE* in)
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
-RSObject* read_character(FILE* in)
+RSObject* read_character(NSMutableString* in)
 {
     int c;
 
@@ -823,7 +816,7 @@ RSObject* read_character(FILE* in)
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
-RSObject* read_pair(NSFileHandle* in)
+RSObject* read_pair(NSMutableString* in)
 {
     int c;
     RSObject* car_obj;
@@ -868,7 +861,7 @@ RSObject* read_pair(NSFileHandle* in)
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
-RSObject* _read(NSFileHandle* in)
+RSObject* _read(NSMutableString* in)
 {
     int c;
     short sign = 1;
@@ -1507,7 +1500,7 @@ tailcall:
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
-void write_pair(NSFileHandle* out, RSObject* pair)
+void write_pair(NSMutableString* out, RSObject* pair)
 {
     RSObject* car_obj = car(pair);
     RSObject* cdr_obj = cdr(pair);
@@ -1529,7 +1522,7 @@ void write_pair(NSFileHandle* out, RSObject* pair)
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
-void _write(NSFileHandle* out, RSObject* obj)
+void _write(NSMutableString* out, RSObject* obj)
 {
     char c;
     NSString* str = [[NSString alloc] init];

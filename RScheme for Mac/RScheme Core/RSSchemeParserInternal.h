@@ -351,7 +351,7 @@ void populate_environment(RSObject* env);
 
 RSObject* make_environment(void);
 
-void init(void);
+void init(NSMutableString* output);
 
 /***************************** READ ******************************/
 
@@ -379,7 +379,7 @@ int peek(FILE* in);
 //    }
 //}
 
-void eat_whitespace(NSFileHandle* in);
+void eat_whitespace(NSMutableString* in);
 
 void eat_expected_string(FILE* in, char* str);
 

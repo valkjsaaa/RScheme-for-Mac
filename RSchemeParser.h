@@ -12,7 +12,7 @@
 
 @interface RSchemeParser : NSObject
 
-- (instancetype)initWithFileHandle:(NSFileHandle*)output;
+- (instancetype)initWithFileHandle:(NSMutableString*)output;
 
 - (void)parse:(NSString*)string error:(NSError**)error;
 

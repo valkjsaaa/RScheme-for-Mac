@@ -20,12 +20,12 @@
 
 @implementation RSchemeParser
 
-- (instancetype)initWithFileHandle:(NSFileHandle*)output
+- (instancetype)initWithFileHandle:(NSMutableString*)output
 {
     self = [super init];
     if (self) {
         _output = output;
-        init();
+        init(output);
     }
     return self;
 }
