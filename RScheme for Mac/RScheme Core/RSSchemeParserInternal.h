@@ -17,7 +17,7 @@
  * modify it under the terms of the GNU Affero General Public
  * License version 3 as published by the Free Software Foundation.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program is distributed input the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License version 3 for more details.
@@ -253,12 +253,12 @@ RSObject* environment_proc(RSObject* arguments);
 
 RSObject* eval_proc(RSObject* arguments);
 
-RSObject* _read(NSFileHandle* in);
+RSObject* _read(NSMutableString* input);
 RSObject* eval(RSObject* exp, RSObject* env);
 
 RSObject* load_proc(RSObject* arguments);
 
-RSObject* make_input_port(FILE* in);
+RSObject* make_input_port(FILE* input);
 
 //TODO: implement this function
 //RSObject* open_input_port_proc(RSObject* arguments);
@@ -276,7 +276,7 @@ RSObject* read_proc(RSObject* arguments);
 
 RSObject* read_char_proc(RSObject* arguments);
 
-int peek(FILE* in);
+int peek(NSMutableString* input);
 
 RSObject* peek_char_proc(RSObject* arguments);
 
@@ -287,7 +287,7 @@ char is_eof_RSObject(RSObject* obj);
 //    return is_eof_RSObject(car(arguments)) ? true_value : false_value;
 //}
 
-//RSObject* make_output_port(FILE* in);
+//RSObject* make_output_port(FILE* input);
 //
 //RSObject* open_output_port_proc(RSObject* arguments);
 //
@@ -302,7 +302,7 @@ char is_eof_RSObject(RSObject* obj);
 
 //RSObject* write_char_proc(RSObject* arguments);
 
-void _write(NSFileHandle* out, RSObject* obj);
+void _write(NSMutableString* out, RSObject* obj);
 
 RSObject* write_proc(RSObject* arguments);
 
@@ -355,41 +355,41 @@ void init(NSMutableString* output);
 
 /***************************** READ ******************************/
 
-char is_delimiter(int c);
+char is_delimiter(unichar c);
 
-char is_initial(int c);
+char is_initial(unichar c);
 
-int peek(FILE* in);
+int peek(NSMutableString* input);
 
-//void eat_whitespace(FILE* in)
+//void eat_whitespace(FILE* input)
 //{
 //    int c;
 //
-//    while ((c = getc(in)) != EOF) {
+//    while ((c = getc(input)) != EOF) {
 //        if (isspace(c)) {
 //            continue;
 //        }
 //        else if (c == ';') { /* comments are whitespace also */
-//            while (((c = getc(in)) != EOF) && (c != '\n'))
+//            while (((c = getc(input)) != EOF) && (c != '\n'))
 //                ;
 //            continue;
 //        }
-//        ungetc(c, in);
+//        ungetc(c, input);
 //        break;
 //    }
 //}
 
-void eat_whitespace(NSMutableString* in);
+void eat_whitespace(NSMutableString* input);
 
-void eat_expected_string(FILE* in, char* str);
+void eat_expected_string(NSMutableString* input, NSString* str);
 
-void peek_expected_delimiter(FILE* in);
+void peek_expected_delimiter(NSMutableString* input);
 
-RSObject* read_character(FILE* in);
+RSObject* read_character(NSMutableString* input);
 
-RSObject* read_pair(NSFileHandle* in);
+RSObject* read_pair(NSMutableString* input);
 
-RSObject* _read(NSFileHandle* in);
+RSObject* _read(NSMutableString* input);
 
 char is_self_evaluating(RSObject* exp);
 
@@ -521,9 +521,9 @@ RSObject* eval_definition(RSObject* exp, RSObject* env);
 
 RSObject* eval(RSObject* exp, RSObject* env);
 
-void write_pair(NSFileHandle* out, RSObject* pair);
+void write_pair(NSMutableString* out, RSObject* pair);
 
-void _write(NSFileHandle* out, RSObject* obj);
+void _write(NSMutableString* out, RSObject* obj);
 /***************************** REPL ******************************/
 //
 //int main(void) {
