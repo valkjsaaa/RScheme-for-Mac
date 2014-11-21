@@ -31,8 +31,16 @@
 
 @class RSObject;
 
-@interface RSNumber : NSObject
+@interface RSBoolNumber : NSObject
 @property long value;
+@end
+
+@interface RSFixNumber : NSObject
+@property long value;
+@end
+
+@interface RSFloatNumber : NSObject
+@property float value;
 @end
 
 @interface RSPair : NSObject
@@ -55,9 +63,10 @@
 @end
 
 @interface RSInternalData : NSObject
-@property RSNumber* boolean;
+@property RSBoolNumber* boolean;
 @property RSString* symbol;
-@property RSNumber* fixnum;
+@property RSFixNumber* fixnum;
+@property RSFloatNumber* floatnum;
 @property RSString* character;
 @property RSString* string;
 @property RSPair* pair;
@@ -70,6 +79,7 @@ typedef enum : NSUInteger {
                    BOOLEAN,
                    SYMBOL,
                    FIXNUM,
+                   FLOATNUM,
                    CHARACTER,
                    STRING,
                    PAIR,

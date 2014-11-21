@@ -83,14 +83,28 @@ RSObject* make_fixnum(long value)
 {
     RSObject* obj = [RSObject new];
     obj.type = FIXNUM;
-    obj.data.fixnum = [RSNumber new];
+    obj.data.fixnum = [RSFixNumber new];
     obj.data.fixnum.value = value;
+    return obj;
+}
+
+RSObject* make_floatnum(float value)
+{
+    RSObject* obj = [RSObject new];
+    obj.type = FLOATNUM;
+    obj.data.floatnum = [RSFloatNumber new];
+    obj.data.floatnum.value = value;
     return obj;
 }
 
 char is_fixnum(RSObject* obj)
 {
     return obj.type == FIXNUM;
+}
+
+char is_floatnumber(RSObject* obj)
+{
+    return obj.type == FLOATNUM;
 }
 
 RSObject* make_character(char value)
@@ -247,58 +261,137 @@ RSObject* string_to_symbol_proc(RSObject* arguments)
     return make_symbol((car(arguments)).data.string.value);
 }
 
+//!!!: nasty workaround, fix this in future
+float get_float(RSObject* obj)
+{
+    return (obj.type == FIXNUM) ? obj.data.fixnum.value : obj.data.floatnum.value;
+}
+
 RSObject* add_proc(RSObject* arguments)
 {
-    long result = 0;
-
-    while (!is_the_empty_list(arguments)) {
-        result += (car(arguments)).data.fixnum.value;
-        arguments = cdr(arguments);
+    RSObjectType type = FIXNUM;
+    RSObject* temp_arguments = arguments;
+    while (!is_the_empty_list(temp_arguments)) {
+        if ((car(temp_arguments)).type != FIXNUM && (car(temp_arguments)).type != BOOLEAN)
+            type = FLOATNUM;
+        temp_arguments = cdr(temp_arguments);
     }
-    return make_fixnum(result);
+    if (type == FIXNUM) {
+        long result = 0;
+        while (!is_the_empty_list(arguments)) {
+            result += (car(arguments)).data.fixnum.value;
+            arguments = cdr(arguments);
+        }
+        return make_fixnum(result);
+    }
+    else {
+        float result = 0;
+        while (!is_the_empty_list(arguments)) {
+            if ((car(arguments)).type == FIXNUM) {
+                result += (car(arguments)).data.fixnum.value;
+            }
+            else {
+                result += (car(arguments)).data.floatnum.value;
+            }
+            arguments = cdr(arguments);
+        }
+        return make_floatnum(result);
+    }
 }
 
 RSObject* sub_proc(RSObject* arguments)
 {
-    long result;
-
-    result = (car(arguments)).data.fixnum.value;
-    while (!is_the_empty_list(arguments = cdr(arguments))) {
-        result -= (car(arguments)).data.fixnum.value;
+    RSObjectType type = FIXNUM;
+    RSObject* temp_arguments = arguments;
+    while (!is_the_empty_list(temp_arguments)) {
+        if ((car(temp_arguments)).type != FIXNUM && (car(temp_arguments)).type != BOOLEAN)
+            type = FLOATNUM;
+        temp_arguments = cdr(temp_arguments);
     }
-    return make_fixnum(result);
+    if (type == FIXNUM) {
+        long result = (car(arguments)).data.fixnum.value;
+        while (!is_the_empty_list(arguments = cdr(arguments))) {
+            result -= (car(arguments)).data.fixnum.value;
+        }
+        return make_fixnum(result);
+    }
+    else {
+        float result = get_float(car(arguments));
+        while (!is_the_empty_list(arguments = cdr(arguments))) {
+            if ((car(arguments)).type == FIXNUM) {
+                result -= (car(arguments)).data.fixnum.value;
+            }
+            else {
+                result -= (car(arguments)).data.floatnum.value;
+            }
+        }
+        return make_floatnum(result);
+    }
 }
 
 RSObject* mul_proc(RSObject* arguments)
 {
-    long result = 1;
-
-    while (!is_the_empty_list(arguments)) {
-        result *= (car(arguments)).data.fixnum.value;
-        arguments = cdr(arguments);
+    RSObjectType type = FIXNUM;
+    RSObject* temp_arguments = arguments;
+    while (!is_the_empty_list(temp_arguments)) {
+        if ((car(temp_arguments)).type != FIXNUM && (car(temp_arguments)).type != BOOLEAN)
+            type = FLOATNUM;
+        temp_arguments = cdr(temp_arguments);
     }
-    return make_fixnum(result);
+    if (type == FIXNUM) {
+        long result = 1;
+        while (!is_the_empty_list(arguments)) {
+            result *= (car(arguments)).data.fixnum.value;
+            arguments = cdr(arguments);
+        }
+        return make_fixnum(result);
+    }
+    else {
+        float result = 1;
+        while (!is_the_empty_list(arguments)) {
+            if ((car(arguments)).type == FIXNUM) {
+                result *= (car(arguments)).data.fixnum.value;
+            }
+            else {
+                result *= (car(arguments)).data.floatnum.value;
+            }
+            arguments = cdr(arguments);
+        }
+        return make_floatnum(result);
+    }
 }
 
 RSObject* quotient_proc(RSObject* arguments)
 {
-    return make_fixnum(
-        ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
+    if ((car(arguments)).type == FLOATNUM || (cadr(arguments)).type == FLOATNUM) {
+        return make_floatnum(get_float(car(arguments)) / get_float(cadr(arguments)));
+    }
+    else {
+        return make_fixnum(
+            ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
+    }
 }
 
 RSObject* remainder_proc(RSObject* arguments)
 {
-    return make_fixnum(
-        ((car(arguments)).data.fixnum.value) % ((cadr(arguments)).data.fixnum.value));
+    if ((car(arguments)).type == FLOATNUM || (cadr(arguments)).type == FLOATNUM) {
+        NSLog(@"error");
+        exit(1);
+        //        return make_floatnum(((car(arguments)).data.floatnum.value) / ((cadr(arguments)).data.floatnum.value));
+    }
+    else {
+        return make_fixnum(
+            ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
+    }
 }
 
 RSObject* is_number_equal_proc(RSObject* arguments)
 {
-    long value;
+    float value;
 
-    value = (car(arguments)).data.fixnum.value;
+    value = get_float(car(arguments));
     while (!is_the_empty_list(arguments = cdr(arguments))) {
-        if (value != ((car(arguments)).data.fixnum.value)) {
+        if (value != get_float(car(arguments))) {
             return false_value;
         }
     }
@@ -307,12 +400,12 @@ RSObject* is_number_equal_proc(RSObject* arguments)
 
 RSObject* is_less_than_proc(RSObject* arguments)
 {
-    long previous;
-    long next;
+    float previous;
+    float next;
 
-    previous = (car(arguments)).data.fixnum.value;
+    previous = get_float(car(arguments));
     while (!is_the_empty_list(arguments = cdr(arguments))) {
-        next = (car(arguments)).data.fixnum.value;
+        next = get_float(car(arguments));
         if (previous < next) {
             previous = next;
         }
@@ -325,12 +418,12 @@ RSObject* is_less_than_proc(RSObject* arguments)
 
 RSObject* is_greater_than_proc(RSObject* arguments)
 {
-    long previous;
-    long next;
+    float previous;
+    float next;
 
-    previous = (car(arguments)).data.fixnum.value;
+    previous = get_float(car(arguments));
     while (!is_the_empty_list(arguments = cdr(arguments))) {
-        next = (car(arguments)).data.fixnum.value;
+        next = get_float(car(arguments));
         if (previous > next) {
             previous = next;
         }
@@ -650,7 +743,9 @@ void populate_environment(RSObject* env)
     add_procedure(@"-", sub_proc);
     add_procedure(@"*", mul_proc);
     add_procedure(@"quotient", quotient_proc);
+    add_procedure(@"/", quotient_proc);
     add_procedure(@"remainder", remainder_proc);
+    add_procedure(@"%", remainder_proc);
     add_procedure(@"=", is_number_equal_proc);
     add_procedure(@"<", is_less_than_proc);
     add_procedure(@">", is_greater_than_proc);
@@ -684,7 +779,7 @@ void populate_environment(RSObject* env)
     //    add_procedure(@"close-output-port", close_output_port_proc);
     //    add_procedure(@"output-port?", is_output_port_proc);
     //    add_procedure(@"write-char", write_char_proc);
-    //    add_procedure(@"write", write_proc);
+    add_procedure(@"write", write_proc);
 
     add_procedure(@"error", error_proc);
 }
@@ -707,12 +802,12 @@ void init(NSMutableString* output)
 
     false_value = [RSObject new];
     false_value.type = BOOLEAN;
-    false_value.data.boolean = [RSNumber new];
+    false_value.data.boolean = [RSBoolNumber new];
     false_value.data.boolean.value = 0;
 
     true_value = [RSObject new];
     true_value.type = BOOLEAN;
-    true_value.data.boolean = [RSNumber new];
+    true_value.data.boolean = [RSBoolNumber new];
     true_value.data.boolean.value = 1;
 
     symbol_table = the_empty_list;
@@ -746,7 +841,7 @@ char is_delimiter(unichar c)
 
 char is_initial(unichar c)
 {
-    return isalpha(c) || c == '*' || c == '/' || c == '>' || c == '<' || c == '=' || c == '?' || c == '!';
+    return isalpha(c) || c == '*' || c == '/' || c == '>' || c == '<' || c == '=' || c == '?' || c == '!' || c == '_' || c == '%';
 }
 
 int peek(NSMutableString* input)
@@ -890,9 +985,9 @@ RSObject* read_pair(NSMutableString* input)
 RSObject* _read(NSMutableString* input)
 {
     unichar c;
-    short sign = 1;
+    //    short sign = 1;
     int i;
-    long num = 0;
+//    long num = 0;
 
 #define BUFFER_MAX 1000
     NSMutableString* buffer = [[NSMutableString alloc] init];
@@ -920,23 +1015,41 @@ RSObject* _read(NSMutableString* input)
         }
     }
     else if (isdigit(c) || (c == '-' && isdigit(peek(input)))) {
-        if (c == '-') {
-            sign = -1;
+        //TODO:
+        //        if (c == '-') {
+        //            sign = -1;
+        //        }
+        //        else {
+        //            _ungetc(input, c);
+        //        }
+        //        while (isdigit(c = _getc(input))) {
+        //            num = (num * 10) + (c - '0');
+        //        }
+        //        num *= sign;
+        //        if (is_delimiter(c)) {
+        //            _ungetc(input, c);
+        //            return make_fixnum(num);
+        //        }
+        //        else {
+        //            fprintf(stderr, "number not followed by delimiter\n");
+        //            exit(1);
+        //        }
+        _ungetc(input, c);
+        NSMutableCharacterSet* seperater_set = [[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy];
+        [seperater_set addCharactersInString:@"()"];
+        double temp2;
+        long long temp1;
+        NSScanner* scanner = [NSScanner scannerWithString:input];
+        [scanner scanLongLong:&temp1];
+        if ([input characterAtIndex:[scanner scanLocation]]!='.') {
+            [input setString:[input substringFromIndex:scanner.scanLocation]];
+            return make_fixnum(temp1);
         }
         else {
-            _ungetc(input, c);
-        }
-        while (isdigit(c = _getc(input))) {
-            num = (num * 10) + (c - '0');
-        }
-        num *= sign;
-        if (is_delimiter(c)) {
-            _ungetc(input, c);
-            return make_fixnum(num);
-        }
-        else {
-            fprintf(stderr, "number not followed by delimiter\n");
-            exit(1);
+            scanner = [NSScanner scannerWithString:input];
+            [scanner scanDouble:&temp2];
+            [input setString:[input substringFromIndex:scanner.scanLocation]];
+            return make_floatnum(temp2);
         }
     }
     else if (is_initial(c) || ((c == '+' || c == '-') && is_delimiter(peek(input)))) { // read a symbol
@@ -999,7 +1112,7 @@ RSObject* _read(NSMutableString* input)
     else if (c == '\'') { // read quoted expression
         return cons(quote_symbol, cons(_read(input), the_empty_list));
     }
-    else if (c == (unichar)EOF) {
+    else if (c == (unichar)0xFF) {
         return nil;
     }
     else {
@@ -1012,7 +1125,7 @@ RSObject* _read(NSMutableString* input)
 
 char is_self_evaluating(RSObject* exp)
 {
-    return is_boolean(exp) || is_fixnum(exp) || is_character(exp) || is_string(exp);
+    return is_boolean(exp) || is_fixnum(exp) || is_floatnumber(exp) || is_character(exp) || is_string(exp);
 }
 
 char is_variable(RSObject* expression)
@@ -1566,6 +1679,9 @@ void _write(NSMutableString* out, RSObject* obj)
     case FIXNUM:
         [out appendString:[NSString stringWithFormat:@"%ld", obj.data.fixnum.value]];
         break;
+    case FLOATNUM:
+        [out appendString:[NSString stringWithFormat:@"%lf", obj.data.floatnum.value]];
+        break;
     case CHARACTER:
         c = [obj.data.character.value characterAtIndex:0];
         [out appendString:@"#\\"];
@@ -1618,7 +1734,15 @@ void _write(NSMutableString* out, RSObject* obj)
     }
 }
 
-@implementation RSNumber
+@implementation RSBoolNumber
+
+@end
+
+@implementation RSFloatNumber
+
+@end
+
+@implementation RSFixNumber
 
 @end
 
