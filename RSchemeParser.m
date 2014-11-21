@@ -12,7 +12,7 @@
 
 @interface RSchemeParser ()
 
-@property NSFileHandle* output;
+@property NSMutableString* output;
 
 @property RSObject* exp;
 
@@ -24,6 +24,7 @@
 {
     self = [super init];
     if (self) {
+        _output = [NSMutableString new];
         _output = output;
         init(output);
     }
@@ -32,7 +33,7 @@
 
 - (void)parse:(NSString*)string error:(NSError* __autoreleasing*)error
 {
-    NSFileHandle * temp = [NSFileHandle fileHandleForWritingAtPath:@"/Users/Jackie/Downloads/temp_RScheme"];
+    NSFileHandle* temp = [NSFileHandle fileHandleForWritingAtPath:@"/Users/Jackie/Downloads/temp_RScheme"];
     [temp writeData:[string dataUsingEncoding:NSUTF8StringEncoding]];
     temp = [NSFileHandle fileHandleForReadingAtPath:@"/Users/Jackie/Downloads/temp_RScheme"];
     _exp = _read(temp);

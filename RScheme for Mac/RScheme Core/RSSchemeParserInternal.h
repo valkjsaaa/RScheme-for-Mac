@@ -253,7 +253,7 @@ RSObject* environment_proc(RSObject* arguments);
 
 RSObject* eval_proc(RSObject* arguments);
 
-RSObject* _read(NSFileHandle* in);
+RSObject* _read(NSMutableString* in);
 RSObject* eval(RSObject* exp, RSObject* env);
 
 RSObject* load_proc(RSObject* arguments);
@@ -302,7 +302,7 @@ char is_eof_RSObject(RSObject* obj);
 
 //RSObject* write_char_proc(RSObject* arguments);
 
-void _write(NSFileHandle* out, RSObject* obj);
+void _write(NSMutableString* out, RSObject* obj);
 
 RSObject* write_proc(RSObject* arguments);
 
@@ -387,9 +387,9 @@ void peek_expected_delimiter(FILE* in);
 
 RSObject* read_character(FILE* in);
 
-RSObject* read_pair(NSFileHandle* in);
+RSObject* read_pair(NSMutableString* in);
 
-RSObject* _read(NSFileHandle* in);
+RSObject* _read(NSMutableString* in);
 
 char is_self_evaluating(RSObject* exp);
 
@@ -521,9 +521,9 @@ RSObject* eval_definition(RSObject* exp, RSObject* env);
 
 RSObject* eval(RSObject* exp, RSObject* env);
 
-void write_pair(NSFileHandle* out, RSObject* pair);
+void write_pair(NSMutableString* out, RSObject* pair);
 
-void _write(NSFileHandle* out, RSObject* obj);
+void _write(NSMutableString* out, RSObject* obj);
 /***************************** REPL ******************************/
 //
 //int main(void) {
