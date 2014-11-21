@@ -53,7 +53,7 @@ RSObject* make_symbol(NSString* value)
 {
     RSObject* obj;
     RSObject* element;
-    
+
     /* search for they symbol in the symbol table */
     element = symbol_table;
     while (!is_the_empty_list(element)) {
@@ -62,7 +62,7 @@ RSObject* make_symbol(NSString* value)
         }
         element = cdr(element);
     };
-    
+
     /* create the symbol and add it to the symbol table */
     obj = [RSObject new];
     obj.type = SYMBOL;
@@ -209,7 +209,7 @@ char is_compound_proc(RSObject* obj);
 RSObject* is_procedure_proc(RSObject* arguments)
 {
     RSObject* obj;
-    
+
     obj = car(arguments);
     return (is_primitive_proc(obj) || is_compound_proc(obj)) ? true_value : false_value;
 }
@@ -248,7 +248,7 @@ RSObject* string_to_symbol_proc(RSObject* arguments)
 RSObject* add_proc(RSObject* arguments)
 {
     long result = 0;
-    
+
     while (!is_the_empty_list(arguments)) {
         result += (car(arguments)).data.fixnum.value;
         arguments = cdr(arguments);
@@ -259,7 +259,7 @@ RSObject* add_proc(RSObject* arguments)
 RSObject* sub_proc(RSObject* arguments)
 {
     long result;
-    
+
     result = (car(arguments)).data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         result -= (car(arguments)).data.fixnum.value;
@@ -270,7 +270,7 @@ RSObject* sub_proc(RSObject* arguments)
 RSObject* mul_proc(RSObject* arguments)
 {
     long result = 1;
-    
+
     while (!is_the_empty_list(arguments)) {
         result *= (car(arguments)).data.fixnum.value;
         arguments = cdr(arguments);
@@ -281,19 +281,19 @@ RSObject* mul_proc(RSObject* arguments)
 RSObject* quotient_proc(RSObject* arguments)
 {
     return make_fixnum(
-                       ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
+        ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
 }
 
 RSObject* remainder_proc(RSObject* arguments)
 {
     return make_fixnum(
-                       ((car(arguments)).data.fixnum.value) % ((cadr(arguments)).data.fixnum.value));
+        ((car(arguments)).data.fixnum.value) % ((cadr(arguments)).data.fixnum.value));
 }
 
 RSObject* is_number_equal_proc(RSObject* arguments)
 {
     long value;
-    
+
     value = (car(arguments)).data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         if (value != ((car(arguments)).data.fixnum.value)) {
@@ -307,7 +307,7 @@ RSObject* is_less_than_proc(RSObject* arguments)
 {
     long previous;
     long next;
-    
+
     previous = (car(arguments)).data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         next = (car(arguments)).data.fixnum.value;
@@ -325,7 +325,7 @@ RSObject* is_greater_than_proc(RSObject* arguments)
 {
     long previous;
     long next;
-    
+
     previous = (car(arguments)).data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         next = (car(arguments)).data.fixnum.value;
@@ -375,25 +375,25 @@ RSObject* is_eq_proc(RSObject* arguments)
 {
     RSObject* obj1;
     RSObject* obj2;
-    
+
     obj1 = car(arguments);
     obj2 = cadr(arguments);
-    
+
     if (obj1.type != obj2.type) {
         return false_value;
     }
     switch (obj1.type) {
-        case FIXNUM:
-            return (obj1.data.fixnum.value == obj2.data.fixnum.value) ? true_value : false_value;
-            break;
-        case CHARACTER:
-            return (obj1.data.character.value == obj2.data.character.value) ? true_value : false_value;
-            break;
-        case STRING:
-            return ([obj1.data.string.value isEqualToString:obj2.data.string.value]) ? true_value : false_value;
-            break;
-        default:
-            return (obj1 == obj2) ? true_value : false_value;
+    case FIXNUM:
+        return (obj1.data.fixnum.value == obj2.data.fixnum.value) ? true_value : false_value;
+        break;
+    case CHARACTER:
+        return (obj1.data.character.value == obj2.data.character.value) ? true_value : false_value;
+        break;
+    case STRING:
+        return ([obj1.data.string.value isEqualToString:obj2.data.string.value]) ? true_value : false_value;
+        break;
+    default:
+        return (obj1 == obj2) ? true_value : false_value;
     }
 }
 
@@ -424,13 +424,14 @@ RSObject* eval_proc(RSObject* arguments)
     exit(1);
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* load_proc(RSObject* arguments)
 {
     NSString* filename;
     NSFileHandle* in;
     RSObject* exp;
     RSObject* result;
-    
+
     filename = car(arguments).data.string.value;
     in = [NSFileHandle fileHandleForReadingAtPath:filename];
     if (in == nil) {
@@ -443,11 +444,12 @@ RSObject* load_proc(RSObject* arguments)
     return result;
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* write_proc(RSObject* arguments)
 {
     RSObject* exp;
     NSFileHandle* out;
-    
+
     exp = car(arguments);
     arguments = cdr(arguments);
     //    out = is_the_empty_list(arguments) ?
@@ -459,6 +461,7 @@ RSObject* write_proc(RSObject* arguments)
     return ok_symbol;
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* error_proc(RSObject* arguments)
 {
     while (!is_the_empty_list(arguments)) {
@@ -474,7 +477,7 @@ RSObject* make_compound_proc(RSObject* parameters, RSObject* body,
                              RSObject* env)
 {
     RSObject* obj;
-    
+
     obj = [RSObject new];
     obj.type = COMPOUND_PROC;
     obj.data.compound_proc = [RSCompoundProc new];
@@ -564,7 +567,7 @@ void set_variable_value(RSObject* var, RSObject* val, RSObject* env)
     RSObject* frame;
     RSObject* vars;
     RSObject* vals;
-    
+
     while (!is_the_empty_list(env)) {
         frame = first_frame(env);
         vars = frame_variables(frame);
@@ -588,11 +591,11 @@ void define_variable(RSObject* var, RSObject* val, RSObject* env)
     RSObject* frame;
     RSObject* vars;
     RSObject* vals;
-    
+
     frame = first_frame(env);
     vars = frame_variables(frame);
     vals = frame_values(frame);
-    
+
     while (!is_the_empty_list(vars)) {
         if (var == car(vars)) {
             set_car(vals, val);
@@ -607,22 +610,22 @@ void define_variable(RSObject* var, RSObject* val, RSObject* env)
 RSObject* setup_environment(void)
 {
     RSObject* initial_env;
-    
+
     initial_env = extend_environment(
-                                     the_empty_list,
-                                     the_empty_list,
-                                     the_empty_environment);
+        the_empty_list,
+        the_empty_list,
+        the_empty_environment);
     return initial_env;
 }
 
 void populate_environment(RSObject* env)
 {
-    
+
 #define add_procedure(scheme_name, c_name)       \
-define_variable(make_symbol(scheme_name),    \
-make_primitive_proc(c_name), \
-env);
-    
+    define_variable(make_symbol(scheme_name),    \
+                    make_primitive_proc(c_name), \
+                    env);
+
     add_procedure(@"null?", is_null_proc);
     add_procedure(@"boolean?", is_boolean_proc);
     add_procedure(@"symbol?", is_symbol_proc);
@@ -631,14 +634,14 @@ env);
     add_procedure(@"string?", is_string_proc);
     add_procedure(@"pair?", is_pair_proc);
     add_procedure(@"procedure?", is_procedure_proc);
-    
+
     add_procedure(@"char.integer", char_to_integer_proc);
     add_procedure(@"integer.char", integer_to_char_proc);
     add_procedure(@"number.string", number_to_string_proc);
     add_procedure(@"string.number", string_to_number_proc);
     add_procedure(@"symbol.string", symbol_to_string_proc);
     add_procedure(@"string.symbol", string_to_symbol_proc);
-    
+
     add_procedure(@"+", add_proc);
     add_procedure(@"-", sub_proc);
     add_procedure(@"*", mul_proc);
@@ -647,24 +650,24 @@ env);
     add_procedure(@"=", is_number_equal_proc);
     add_procedure(@"<", is_less_than_proc);
     add_procedure(@">", is_greater_than_proc);
-    
+
     add_procedure(@"cons", cons_proc);
     add_procedure(@"car", car_proc);
     add_procedure(@"cdr", cdr_proc);
     add_procedure(@"set-car!", set_car_proc);
     add_procedure(@"set-cdr!", set_cdr_proc);
     add_procedure(@"list", list_proc);
-    
+
     add_procedure(@"eq?", is_eq_proc);
-    
+
     add_procedure(@"apply", apply_proc);
-    
+
     add_procedure(@"interaction-environment",
                   interaction_environment_proc);
     add_procedure(@"null-environment", null_environment_proc);
     add_procedure(@"environment", environment_proc);
     add_procedure(@"eval", eval_proc);
-    
+
     //    add_procedure(@"load", load_proc);
     //    add_procedure(@"open-input-port", open_input_port_proc);
     //    add_procedure(@"close-input-port", close_input_port_proc);
@@ -678,14 +681,14 @@ env);
     //    add_procedure(@"output-port?", is_output_port_proc);
     //    add_procedure(@"write-char", write_char_proc);
     //    add_procedure(@"write", write_proc);
-    
+
     add_procedure(@"error", error_proc);
 }
 
 RSObject* make_environment(void)
 {
     RSObject* env;
-    
+
     env = setup_environment();
     populate_environment(env);
     return env;
@@ -695,17 +698,17 @@ void init(void)
 {
     the_empty_list = [RSObject new];
     the_empty_list.type = THE_EMPTY_LIST;
-    
+
     false_value = [RSObject new];
     false_value.type = BOOLEAN;
     false_value.data.boolean = [RSNumber new];
     false_value.data.boolean.value = 0;
-    
+
     true_value = [RSObject new];
     true_value.type = BOOLEAN;
     true_value.data.boolean = [RSNumber new];
     true_value.data.boolean.value = 1;
-    
+
     symbol_table = the_empty_list;
     quote_symbol = make_symbol(@"quote");
     define_symbol = make_symbol(@"define");
@@ -719,12 +722,12 @@ void init(void)
     let_symbol = make_symbol(@"let");
     and_symbol = make_symbol(@"and");
     or_symbol = make_symbol(@"or");
-    
+
     //    eof_RSObject = [RSObject new];
     //    eof_RSObject.type = EOF_OBJECT;
-    
+
     the_empty_environment = the_empty_list;
-    
+
     the_global_environment = make_environment();
 }
 
@@ -743,16 +746,17 @@ char is_initial(int c)
 int peek(FILE* in)
 {
     int c;
-    
+
     c = getc(in);
     ungetc(c, in);
     return c;
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 void eat_whitespace(NSFileHandle* in)
 {
     int c;
-    
+
     while ((c = [in getc]) != EOF) {
         if (isspace(c)) {
             continue;
@@ -770,7 +774,7 @@ void eat_whitespace(NSFileHandle* in)
 void eat_expected_string(FILE* in, char* str)
 {
     int c;
-    
+
     while (*str != '\0') {
         c = getc(in);
         if (c != *str) {
@@ -789,54 +793,56 @@ void peek_expected_delimiter(FILE* in)
     }
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* read_character(FILE* in)
 {
     int c;
-    
+
     c = getc(in);
     switch (c) {
-        case EOF:
-            fprintf(stderr, "incomplete character literal\n");
-            exit(1);
-        case 's':
-            if (peek(in) == 'p') {
-                eat_expected_string(in, "pace");
-                peek_expected_delimiter(in);
-                return make_character(' ');
-            }
-            break;
-        case 'n':
-            if (peek(in) == 'e') {
-                eat_expected_string(in, "ewline");
-                peek_expected_delimiter(in);
-                return make_character('\n');
-            }
-            break;
+    case EOF:
+        fprintf(stderr, "incomplete character literal\n");
+        exit(1);
+    case 's':
+        if (peek(in) == 'p') {
+            eat_expected_string(in, "pace");
+            peek_expected_delimiter(in);
+            return make_character(' ');
+        }
+        break;
+    case 'n':
+        if (peek(in) == 'e') {
+            eat_expected_string(in, "ewline");
+            peek_expected_delimiter(in);
+            return make_character('\n');
+        }
+        break;
     }
     peek_expected_delimiter(in);
     return make_character(c);
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* read_pair(NSFileHandle* in)
 {
     int c;
     RSObject* car_obj;
     RSObject* cdr_obj;
-    
+
     //[in eatWhiteSpace];
     eat_whitespace(in);
-    
+
     c = [in getc];
     if (c == ')') { //read the empty list
         return the_empty_list;
     }
     [in ungetc:c];
-    
+
     car_obj = _read(in);
-    
+
     //[in eatWhiteSpace];
     eat_whitespace(in);
-    
+
     c = [in getc];
     if (c == '.') { // read improper list
         c = [in peek];
@@ -861,157 +867,37 @@ RSObject* read_pair(NSFileHandle* in)
     }
 }
 
-//TODO: change this function to Objective-C style
-//RSObject* _read(NSFileHandle* in)
-//{
-//    int c;
-//    short sign = 1;
-//    int i;
-//    long num = 0;
-//#define BUFFER_MAX 1000
-//    char buffer[BUFFER_MAX];
-//
-//    eat_whitespace(in);
-//
-//    c = getc(in);
-//
-//    if (c == '#') { /* read a boolean or character */
-//        c = getc(in);
-//        switch (c) {
-//        case 't':
-//            return true;
-//        case 'f':
-//            return false;
-//        case '\\':
-//            return read_character(in);
-//        default:
-//            fprintf(stderr,
-//                    "unknown boolean or character literal\n");
-//            exit(1);
-//        }
-//    }
-//    else if (isdigit(c) || (c == '-' && (isdigit(peek(in))))) {
-//        /* read a fixnum */
-//        if (c == '-') {
-//            sign = -1;
-//        }
-//        else {
-//            ungetc(c, in);
-//        }
-//        while (isdigit(c = getc(in))) {
-//            num = (num * 10) + (c - '0');
-//        }
-//        num *= sign;
-//        if (is_delimiter(c)) {
-//            ungetc(c, in);
-//            return make_fixnum(num);
-//        }
-//        else {
-//            fprintf(stderr, "number not followed by delimiter\n");
-//            exit(1);
-//        }
-//    }
-//    else if (is_initial(c) || ((c == '+' || c == '-') && is_delimiter(peek(in)))) { /* read a symbol */
-//        i = 0;
-//        while (is_initial(c) || isdigit(c) || c == '+' || c == '-') {
-//            /* subtract 1 to save space for '\0' terminator */
-//            if (i < BUFFER_MAX - 1) {
-//                buffer[i++] = c;
-//            }
-//            else {
-//                fprintf(stderr, "symbol too long. "
-//                                "Maximum length is %d\n",
-//                        BUFFER_MAX);
-//                exit(1);
-//            }
-//            c = getc(in);
-//        }
-//        if (is_delimiter(c)) {
-//            buffer[i] = '\0';
-//            ungetc(c, in);
-//            return make_symbol(buffer);
-//        }
-//        else {
-//            fprintf(stderr, "symbol not followed by delimiter. "
-//                            "Found '%c'\n",
-//                    c);
-//            exit(1);
-//        }
-//    }
-//    else if (c == '"') { /* read a string */
-//        i = 0;
-//        while ((c = getc(in)) != '"') {
-//            if (c == '\\') {
-//                c = getc(in);
-//                if (c == 'n') {
-//                    c = '\n';
-//                }
-//            }
-//            if (c == EOF) {
-//                fprintf(stderr, "non-terminated string literal\n");
-//                exit(1);
-//            }
-//            /* subtract 1 to save space for '\0' terminator */
-//            if (i < BUFFER_MAX - 1) {
-//                buffer[i++] = c;
-//            }
-//            else {
-//                fprintf(stderr,
-//                        "string too long. Maximum length is %d\n",
-//                        BUFFER_MAX);
-//                exit(1);
-//            }
-//        }
-//        buffer[i] = '\0';
-//        return make_string(buffer);
-//    }
-//    else if (c == '(') { /* read the empty list or pair */
-//        return read_pair(in);
-//    }
-//    else if (c == '\'') { /* read quoted expression */
-//        return cons(quote_symbol, cons(read(in), the_empty_list));
-//    }
-//    else if (c == EOF) {
-//        return NULL;
-//    }
-//    else {
-//        fprintf(stderr, "bad input. Unexpected '%c'\n", c);
-//        exit(1);
-//    }
-//    fprintf(stderr, "read illegal state\n");
-//    exit(1);
-//}
-
+//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* _read(NSFileHandle* in)
 {
     int c;
     short sign = 1;
     int i;
     long num = 0;
-    
+
 #define BUFFER_MAX 1000
     NSMutableString* buffer = [[NSMutableString alloc] init];
-    
+
     //[in eatWhiteSpace];
     eat_whitespace(in);
-    
+
     c = [in getc];
-    
+
     if (c == '#') { // read a boolean or character
         c = [in getc];
         switch (c) {
-            case 't':
-                return true_value;
-            case 'f':
-                return false_value;
-            case '\\':
-                //TODO: implemented read_character function in objective c style
-                //return read_character((__bridge FILE *)(in));
-                return THE_EMPTY_LIST;
-            default:
-                fprintf(stderr,
-                        "unknown boolean or character literal\n");
-                exit(1);
+        case 't':
+            return true_value;
+        case 'f':
+            return false_value;
+        case '\\':
+            //TODO: implemented read_character function in objective c style
+            //return read_character((__bridge FILE *)(in));
+            return THE_EMPTY_LIST;
+        default:
+            fprintf(stderr,
+                    "unknown boolean or character literal\n");
+            exit(1);
         }
     }
     else if (isdigit(c) || (c == '-' && isdigit([in peek]))) {
@@ -1044,7 +930,7 @@ RSObject* _read(NSFileHandle* in)
             }
             else {
                 fprintf(stderr, "symbol too long. "
-                        "Maximum length is %d\n",
+                                "Maximum length is %d\n",
                         BUFFER_MAX);
                 exit(1);
             }
@@ -1056,7 +942,7 @@ RSObject* _read(NSFileHandle* in)
         }
         else {
             fprintf(stderr, "symbol not followed by delimiter. "
-                    "Found %c\n",
+                            "Found %c\n",
                     c);
             exit(1);
         }
@@ -1081,7 +967,7 @@ RSObject* _read(NSFileHandle* in)
             }
             else {
                 fprintf(stderr, "symbol too long. "
-                        "Maximum length is %d\n",
+                                "Maximum length is %d\n",
                         BUFFER_MAX);
                 exit(1);
             }
@@ -1105,7 +991,6 @@ RSObject* _read(NSFileHandle* in)
     exit(1);
 }
 
-
 char is_self_evaluating(RSObject* exp)
 {
     return is_boolean(exp) || is_fixnum(exp) || is_character(exp) || is_string(exp);
@@ -1119,7 +1004,7 @@ char is_variable(RSObject* expression)
 char is_tagged_list(RSObject* expression, RSObject* tag)
 {
     RSObject* the_car;
-    
+
     if (is_pair(expression)) {
         the_car = car(expression);
         return is_symbol(the_car) && (the_car == tag);
@@ -1305,7 +1190,7 @@ RSObject* expand_clauses(RSObject* clauses)
 {
     RSObject* first;
     RSObject* rest;
-    
+
     if (is_the_empty_list(clauses)) {
         return false;
     }
@@ -1419,16 +1304,15 @@ RSObject* let_arguments(RSObject* exp)
 RSObject* let_to_application(RSObject* exp)
 {
     return make_application(
-                            make_lambda(let_parameters(exp),
-                                        let_body(exp)),
-                            let_arguments(exp));
+        make_lambda(let_parameters(exp),
+                    let_body(exp)),
+        let_arguments(exp));
 }
 
 char is_and(RSObject* exp)
 {
     return is_tagged_list(exp, and_symbol);
 }
-
 
 RSObject* and_tests(RSObject* exp)
 {
@@ -1508,7 +1392,7 @@ RSObject* eval(RSObject* exp, RSObject* env)
     RSObject* procedure;
     RSObject* arguments;
     RSObject* result;
-    
+
 tailcall:
     if (is_self_evaluating(exp)) {
         return exp;
@@ -1584,28 +1468,28 @@ tailcall:
     else if (is_application(exp)) {
         procedure = eval(operator(exp), env);
         arguments = list_of_values(operands(exp), env);
-        
+
         /* handle eval specially for tail call requirement */
         if (is_primitive_proc(procedure) && procedure.data.primitive_proc.fn == eval_proc) {
             exp = eval_expression(arguments);
             env = eval_environment(arguments);
             goto tailcall;
         }
-        
+
         /* handle apply specially for tail call requirement */
         if (is_primitive_proc(procedure) && procedure.data.primitive_proc.fn == apply_proc) {
             procedure = apply_operator(arguments);
             arguments = apply_operands(arguments);
         }
-        
+
         if (is_primitive_proc(procedure)) {
             return (procedure.data.primitive_proc.fn)(arguments);
         }
         else if (is_compound_proc(procedure)) {
             env = extend_environment(
-                                     procedure.data.compound_proc.parameters,
-                                     arguments,
-                                     procedure.data.compound_proc.env);
+                procedure.data.compound_proc.parameters,
+                arguments,
+                procedure.data.compound_proc.env);
             exp = make_begin(procedure.data.compound_proc.body);
             goto tailcall;
         }
@@ -1622,11 +1506,12 @@ tailcall:
     exit(1);
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 void write_pair(NSFileHandle* out, RSObject* pair)
 {
     RSObject* car_obj = car(pair);
     RSObject* cdr_obj = cdr(pair);
-    
+
     _write(out, car_obj);
     if (cdr_obj.type == PAIR) {
         //[out writeData:[NSData dataWithBytes:" " length:1]];
@@ -1643,76 +1528,76 @@ void write_pair(NSFileHandle* out, RSObject* pair)
     }
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 void _write(NSFileHandle* out, RSObject* obj)
 {
     char c;
     NSString* str = [[NSString alloc] init];
-    
+
     switch (obj.type) {
-        case THE_EMPTY_LIST:
-            [out printString:@"()"];
+    case THE_EMPTY_LIST:
+        [out printString:@"()"];
+        break;
+    case BOOLEAN:
+        [out printString:[NSString stringWithFormat:@"#%c", is_false(obj) ? 'f' : 't']];
+        break;
+    case SYMBOL:
+        [out printString:obj.data.symbol.value];
+        break;
+    case FIXNUM:
+        [out printString:[NSString stringWithFormat:@"%ld", obj.data.fixnum.value]];
+        break;
+    case CHARACTER:
+        c = [obj.data.character.value characterAtIndex:0];
+        [out printString:@"#\\"];
+        switch (c) {
+        case '\n':
+            [out printString:@"newline"];
             break;
-        case BOOLEAN:
-            [out printString:[NSString stringWithFormat:@"#%c", is_false(obj) ? 'f' : 't']];
-            break;
-        case SYMBOL:
-            [out printString:obj.data.symbol.value];
-            break;
-        case FIXNUM:
-            [out printString:[NSString stringWithFormat:@"%ld", obj.data.fixnum.value]];
-            break;
-        case CHARACTER:
-            c = [obj.data.character.value characterAtIndex:0];
-            [out printString:@"#\\"];
-            switch (c) {
-                case '\n':
-                    [out printString:@"newline"];
-                    break;
-                case ' ':
-                    [out printString:@"space"];
-                    break;
-                default:
-                    [out printString:[NSString stringWithFormat:@"%c", c]];
-            }
-            break;
-        case STRING:
-            str = obj.data.string.value;
-            [out printString:[NSString stringWithFormat:@"%c", '"']];
-            for (int i = 0; i < str.length; i++) {
-                switch (c = [str characterAtIndex:i]) {
-                    case '\n':
-                        [out printString:@"\n"];
-                        break;
-                    case '\\':
-                        [out printString:@"\\\\"];
-                        break;
-                    case '"':
-                        [out printString:@"\\\""];
-                        break;
-                    default:
-                        [out printString:[NSString stringWithFormat:@"%c", c]];
-                        break;
-                }
-            }
-            [out printString:[NSString stringWithFormat:@"%c", '"']];
-            break;
-        case PAIR:
-            [out printString:@"("];
-            write_pair(out, obj);
-            [out printString:@")"];
-            break;
-        case PRIMITIVE_PROC:
-            [out printString:@"#<primitive-procedure>"];
-            break;
-        case COMPOUND_PROC:
-            [out printString:@"#<compound-procedure>"];
+        case ' ':
+            [out printString:@"space"];
             break;
         default:
-            fprintf(stderr, "cannot write unknown type\n");
-            exit(1);
+            [out printString:[NSString stringWithFormat:@"%c", c]];
+        }
+        break;
+    case STRING:
+        str = obj.data.string.value;
+        [out printString:[NSString stringWithFormat:@"%c", '"']];
+        for (int i = 0; i < str.length; i++) {
+            switch (c = [str characterAtIndex:i]) {
+            case '\n':
+                [out printString:@"\n"];
+                break;
+            case '\\':
+                [out printString:@"\\\\"];
+                break;
+            case '"':
+                [out printString:@"\\\""];
+                break;
+            default:
+                [out printString:[NSString stringWithFormat:@"%c", c]];
+                break;
+            }
+        }
+        [out printString:[NSString stringWithFormat:@"%c", '"']];
+        break;
+    case PAIR:
+        [out printString:@"("];
+        write_pair(out, obj);
+        [out printString:@")"];
+        break;
+    case PRIMITIVE_PROC:
+        [out printString:@"#<primitive-procedure>"];
+        break;
+    case COMPOUND_PROC:
+        [out printString:@"#<compound-procedure>"];
+        break;
+    default:
+        fprintf(stderr, "cannot write unknown type\n");
+        exit(1);
     }
 }
-
 
 @implementation RSNumber
 
