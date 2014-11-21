@@ -81,9 +81,9 @@ char is_symbol(RSObject* obj)
 
 RSObject* make_fixnum(long value)
 {
-    RSObject* obj = [[RSObject alloc] init];
+    RSObject* obj = [RSObject new];
     obj.type = FIXNUM;
-    obj.data.fixnum = [RSNumber init];
+    obj.data.fixnum = [RSNumber new];
     obj.data.fixnum.value = value;
     return obj;
 }
@@ -754,21 +754,22 @@ int peek(NSMutableString* input)
     return [input characterAtIndex:0];
 }
 
-unichar _getc(NSMutableString *input)
+unichar _getc(NSMutableString* input)
 {
     @try {
         unichar c = [input characterAtIndex:0];
         [input setString:[input substringFromIndex:1]];
         return c;
     }
-    @catch (NSException *exception) {
+    @catch (NSException* exception)
+    {
         return (unichar)EOF;
     }
 }
 
-void _ungetc(NSMutableString *input, unichar c)
+void _ungetc(NSMutableString* input, unichar c)
 {
-    NSString *insert = [NSString stringWithFormat:@"%c", c];
+    NSString* insert = [NSString stringWithFormat:@"%c", c];
     [input insertString:insert atIndex:0];
 }
 
@@ -795,10 +796,10 @@ void eat_expected_string(FILE* input, char* str)
 
 void eat_expected_string(NSMutableString* input, NSString* str)
 {
-    if ([input hasPrefix:str]){
+    if ([input hasPrefix:str]) {
         [input setString:[input substringFromIndex:str.length]];
     }
-    else{
+    else {
         NSLog(@"unexpected character");
     }
 }
@@ -816,9 +817,9 @@ RSObject* read_character(NSMutableString* input)
 {
     unichar c;
     c = _getc(input);
-    
+
     switch (c) {
-    case (unichar)EOF:
+    case (unichar) EOF:
         fprintf(stderr, "incomplete character literal\n");
         exit(1);
     case 's':

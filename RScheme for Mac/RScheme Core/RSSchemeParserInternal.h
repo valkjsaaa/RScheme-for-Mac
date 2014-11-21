@@ -28,7 +28,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "NSFileHandle+withGetc.h"
 
 @class RSObject;
 

@@ -33,11 +33,9 @@
 
 - (void)parse:(NSString*)string error:(NSError* __autoreleasing*)error
 {
-    NSFileHandle* temp = [NSFileHandle fileHandleForWritingAtPath:@"/Users/Jackie/Downloads/temp_RScheme"];
-    [temp writeData:[string dataUsingEncoding:NSUTF8StringEncoding]];
-    temp = [NSFileHandle fileHandleForReadingAtPath:@"/Users/Jackie/Downloads/temp_RScheme"];
-    _exp = _read(temp);
-    _write(_output, eval(_exp, the_global_environment));
+    _exp = _read([string mutableCopy]);
+    RSObject* result = eval(_exp, the_global_environment);
+    _write(_output, result);
 }
 
 @end
