@@ -82,6 +82,22 @@
     XCTAssert([_output isEqualToString:@"okokokokokokok3.000001ok"], @"Pass");
 }
 
+- (void)testGUI
+{
+    _output = [NSMutableString new];
+    _parser = [[RSchemeParser alloc] initWithFileHandle:_output];
+    //[_parser parse:@"\n" error:nil];
+    [_output setString:@""];
+    [_parser parseMultiline:@"\n" error:nil];
+    XCTAssert([_output isEqualToString:@""], @"Passed");
+    [_output setString:@""];
+    [_parser parseMultiline:@"(+ 1 2)\n(+ 3 4)" error:nil];
+    XCTAssert([_output isEqualToString:@"37"], @"Passed");
+    [_output setString:@""];
+    [_parser parseMultiline:@"(+ 1 \n2)" error:nil];
+    XCTAssert([_output isEqualToString:@"3"], @"Passed");
+}
+
 - (void)testPerformanceExample
 {
     // This is an example of a performance test case.
