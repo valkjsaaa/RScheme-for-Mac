@@ -56,6 +56,10 @@
 @property RSObject* (*fn)(RSObject* arguments);
 @end
 
+@interface RSPrimitiveBlock : NSObject
+@property (strong) RSObject* (^fn)(RSObject* arguments);
+@end
+
 @interface RSCompoundProc : NSObject
 @property RSObject* parameters;
 @property RSObject* body;
@@ -71,6 +75,7 @@
 @property RSString* string;
 @property RSPair* pair;
 @property RSPrimitiveProc* primitive_proc;
+@property RSPrimitiveBlock* primitive_block;
 @property RSCompoundProc* compound_proc;
 @end
 
@@ -84,6 +89,7 @@ typedef enum : NSUInteger {
                    STRING,
                    PAIR,
                    PRIMITIVE_PROC,
+                   PRIMITIVE_BLOCK,
                    COMPOUND_PROC,
                } RSObjectType;
 
@@ -91,8 +97,9 @@ typedef enum : NSUInteger {
 - (instancetype)init;
 @property RSInternalData* data;
 @property RSObjectType type;
-
 @end
+
+typedef RSObject* (^RSObjectBlock)(RSObject*);
 
 RSObject* the_empty_list;
 RSObject* false_value;
@@ -112,7 +119,7 @@ RSObject* and_symbol;
 RSObject* or_symbol;
 RSObject* eof_RSObject;
 RSObject* the_empty_environment;
-RSObject* the_global_environment;
+//RSObject* the_global_environment;
 
 RSObject* cons(RSObject* car, RSObject* cdr);
 RSObject* car(RSObject* pair);
@@ -185,7 +192,11 @@ void set_cdr(RSObject* obj, RSObject* value);
 
 RSObject* make_primitive_proc(RSObject* (*fn)(RSObject* arguments));
 
+RSObject* make_primitive_block(RSObject* (^fn)(RSObject* arguments));
+
 char is_primitive_proc(RSObject* obj);
+
+char is_primitive_block(RSObject* obj);
 
 RSObject* is_null_proc(RSObject* arguments);
 
@@ -250,22 +261,22 @@ RSObject* is_eq_proc(RSObject* arguments);
 
 RSObject* apply_proc(RSObject* arguments);
 
-RSObject* interaction_environment_proc(RSObject* arguments);
+RSObject* (^interaction_environment_proc(RSObject* arguments))(RSObject* the_global_envrionment);
 
 RSObject* setup_environment(void);
 
 RSObject* null_environment_proc(RSObject* arguments);
 
-RSObject* make_environment(void);
+RSObject* make_environment(RSObject* the_global_environment);
 
-RSObject* environment_proc(RSObject* arguments);
+RSObject* (^environment_proc(RSObject* arguments))(RSObject* the_global_envrionment);
 
 RSObject* eval_proc(RSObject* arguments);
 
 RSObject* _read(NSMutableString* input);
 RSObject* eval(RSObject* exp, RSObject* env);
 
-RSObject* load_proc(RSObject* arguments);
+RSObjectBlock load_proc(RSObject* the_global_envrionment);
 
 RSObject* make_input_port(FILE* input);
 
@@ -356,11 +367,11 @@ void define_variable(RSObject* var, RSObject* val, RSObject* env);
 
 RSObject* setup_environment(void);
 
-void populate_environment(RSObject* env);
+void populate_environment(RSObject* env, RSObject* the_global_environment);
 
-RSObject* make_environment(void);
+RSObject* make_environment(RSObject* the_global_environment);
 
-void init(NSMutableString* output);
+void init(NSMutableString* output, NSObject** the_global_environment);
 
 /***************************** READ ******************************/
 

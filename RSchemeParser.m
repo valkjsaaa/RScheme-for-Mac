@@ -8,13 +8,11 @@
 
 #import "RSchemeParser.h"
 
-//hahahahah
-
 @interface RSchemeParser ()
 
 @property NSMutableString* output;
 
-@property RSObject* exp;
+@property (strong) RSObject* the_global_environment;
 
 @end
 
@@ -26,15 +24,17 @@
     if (self) {
         _output = [NSMutableString new];
         _output = output;
-        init(output);
+        RSObject *the_global_environment;
+        init(output, &the_global_environment);
+        _the_global_environment = the_global_environment;
     }
     return self;
 }
 
 - (void)parse:(NSString*)string error:(NSError* __autoreleasing*)error
 {
-    _exp = _read([string mutableCopy]);
-    RSObject* result = eval(_exp, the_global_environment);
+    RSObject* _exp = _read([string mutableCopy]);
+    RSObject* result = eval(_exp, _the_global_environment);
     _write(_output, result);
 }
 

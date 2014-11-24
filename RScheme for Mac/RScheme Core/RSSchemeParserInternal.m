@@ -180,9 +180,24 @@ RSObject* make_primitive_proc(RSObject* (*fn)(RSObject* arguments))
     return obj;
 }
 
+RSObject* make_primitive_block(RSObject* (^fn)(RSObject* arguments))
+{
+    RSObject* obj;
+    obj = [RSObject new];
+    obj.type = PRIMITIVE_PROC;
+    obj.data.primitive_block = [RSPrimitiveBlock new];
+    obj.data.primitive_block.fn = fn;
+    return obj;
+}
+
 char is_primitive_proc(RSObject* obj)
 {
     return obj.type == PRIMITIVE_PROC;
+}
+
+char is_primitive_block(RSObject* obj)
+{
+    return obj.type == PRIMITIVE_BLOCK;
 }
 
 RSObject* is_null_proc(RSObject* arguments)
@@ -227,7 +242,7 @@ RSObject* is_procedure_proc(RSObject* arguments)
     RSObject* obj;
 
     obj = car(arguments);
-    return (is_primitive_proc(obj) || is_compound_proc(obj)) ? true_value : false_value;
+    return (is_primitive_proc(obj) || is_compound_proc(obj) || is_primitive_block(obj)) ? true_value : false_value;
 }
 
 //??? seems not right
@@ -498,9 +513,19 @@ RSObject* apply_proc(RSObject* arguments)
     exit(1);
 }
 
-RSObject* interaction_environment_proc(RSObject* arguments)
+////FIXME: this function might not work as expected.
+//RSObject* interaction_environment_proc(RSObject* arguments)
+//{
+//    NSLog(@"this function \"interaction_environment_proc\" is not implemented properly yet.");
+//    return nil;
+//    return the_global_environment;
+//}
+
+RSObjectBlock interaction_environment_proc(RSObject* the_global_envrionment)
 {
-    return the_global_environment;
+    return [^(RSObject* arugments) {
+        return the_global_envrionment;
+    } copy];
 }
 
 RSObject* null_environment_proc(RSObject* arguments)
@@ -508,9 +533,10 @@ RSObject* null_environment_proc(RSObject* arguments)
     return setup_environment();
 }
 
-RSObject* environment_proc(RSObject* arguments)
-{
-    return make_environment();
+RSObjectBlock environment_proc(RSObject* the_global_envrionment){
+    return [^(RSObject* arugments) {
+        return make_environment(the_global_envrionment);
+    } copy];
 }
 
 RSObject* eval_proc(RSObject* arguments)
@@ -519,25 +545,47 @@ RSObject* eval_proc(RSObject* arguments)
     exit(1);
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
-RSObject* load_proc(RSObject* arguments)
+////TODO: Change FILE or NSFileHandle to NSMutableString
+//RSObject* load_proc(RSObject* arguments)
+//{
+//    NSString* filename;
+//    NSString* input;
+//    RSObject* exp;
+//    RSObject* result;
+//
+//    filename = car(arguments).data.string.value;
+//    input = [NSString stringWithContentsOfFile:filename usedEncoding:nil error:nil];
+//    if (input == nil) {
+//        NSLog(@"could not load file \"%@\"", filename);
+//        exit(1);
+//    }
+//
+//    while ((exp = _read([input mutableCopy])) != NULL) {
+//        result = eval(exp, the_global_environment);
+//    }
+//    return result;
+//}
+
+RSObjectBlock load_proc(RSObject* the_global_environment)
 {
-    NSString* filename;
-    NSString* input;
-    RSObject* exp;
-    RSObject* result;
-
-    filename = car(arguments).data.string.value;
-    input = [NSString stringWithContentsOfFile:filename usedEncoding:nil error:nil];
-    if (input == nil) {
-        NSLog(@"could not load file \"%@\"", filename);
-        exit(1);
-    }
-
-    while ((exp = _read([input mutableCopy])) != NULL) {
-        result = eval(exp, the_global_environment);
-    }
-    return result;
+    return [^(RSObject* arguments) {
+        NSString* filename;
+        NSString* input;
+        RSObject* exp;
+        RSObject* result;
+        
+        filename = car(arguments).data.string.value;
+        input = [NSString stringWithContentsOfFile:filename usedEncoding:nil error:nil];
+        if (input == nil) {
+            NSLog(@"could not load file \"%@\"", filename);
+            exit(1);
+        }
+        
+        while ((exp = _read([input mutableCopy])) != NULL) {
+            result = eval(exp, the_global_environment);
+        }
+        return result;
+    } copy];
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
@@ -715,12 +763,17 @@ RSObject* setup_environment(void)
     return initial_env;
 }
 
-void populate_environment(RSObject* env)
+void populate_environment(RSObject* env, RSObject* the_global_environment)
 {
 
 #define add_procedure(scheme_name, c_name)       \
     define_variable(make_symbol(scheme_name),    \
                     make_primitive_proc(c_name), \
+                    env);
+
+#define add_block(scheme_name, c_name)            \
+    define_variable(make_symbol(scheme_name),     \
+                    make_primitive_block(c_name), \
                     env);
 
     add_procedure(@"null?", is_null_proc);
@@ -761,10 +814,10 @@ void populate_environment(RSObject* env)
 
     add_procedure(@"apply", apply_proc);
 
-    add_procedure(@"interaction-environment",
-                  interaction_environment_proc);
+    add_block(@"interaction-environment",
+              interaction_environment_proc(the_global_environment));
     add_procedure(@"null-environment", null_environment_proc);
-    add_procedure(@"environment", environment_proc);
+    add_block(@"environment", environment_proc(the_global_environment));
     add_procedure(@"eval", eval_proc);
 
     //    add_procedure(@"load", load_proc);
@@ -784,16 +837,25 @@ void populate_environment(RSObject* env)
     add_procedure(@"error", error_proc);
 }
 
-RSObject* make_environment(void)
+RSObject* make_environment(RSObject* the_global_environment)
 {
     RSObject* env;
 
     env = setup_environment();
-    populate_environment(env);
+    populate_environment(env, the_global_environment);
     return env;
 }
 
-void init(NSMutableString* output)
+RSObject* make_global_environment()
+{
+    RSObject* env;
+    
+    env = setup_environment();
+    populate_environment(env, env);
+    return env;
+}
+
+void init(NSMutableString* output, NSObject*__autoreleasing* the_global_environment)
 {
     standard_output = output;
 
@@ -829,7 +891,7 @@ void init(NSMutableString* output)
 
     the_empty_environment = the_empty_list;
 
-    the_global_environment = make_environment();
+    *the_global_environment = make_global_environment();
 }
 
 /***************************** READ ******************************/
@@ -1041,7 +1103,7 @@ RSObject* _read(NSMutableString* input)
         long long temp1;
         NSScanner* scanner = [NSScanner scannerWithString:input];
         [scanner scanLongLong:&temp1];
-        if ([input characterAtIndex:[scanner scanLocation]]!='.') {
+        if ([input characterAtIndex:[scanner scanLocation]] != '.') {
             [input setString:[input substringFromIndex:scanner.scanLocation]];
             return make_fixnum(temp1);
         }
@@ -1119,8 +1181,6 @@ RSObject* _read(NSMutableString* input)
         fprintf(stderr, "bad input. Unexpected '%c'\n", c);
         exit(1);
     }
-    fprintf(stderr, "read illegal state\n");
-    exit(1);
 }
 
 char is_self_evaluating(RSObject* exp)
@@ -1616,6 +1676,8 @@ tailcall:
 
         if (is_primitive_proc(procedure)) {
             return (procedure.data.primitive_proc.fn)(arguments);
+        }else if(is_primitive_block(procedure)){
+            return (procedure.data.primitive_block.fn)(arguments);
         }
         else if (is_compound_proc(procedure)) {
             env = extend_environment(
@@ -1634,8 +1696,6 @@ tailcall:
         fprintf(stderr, "cannot eval unknown expression type\n");
         exit(1);
     }
-    fprintf(stderr, "eval illegal state\n");
-    exit(1);
 }
 
 //TODO: Change FILE or NSFileHandle to NSMutableString
@@ -1725,6 +1785,9 @@ void _write(NSMutableString* out, RSObject* obj)
     case PRIMITIVE_PROC:
         [out appendString:@"#<primitive-procedure>"];
         break;
+    case PRIMITIVE_BLOCK:
+        [out appendString:@"#<primitive-procedure>"];
+        break;
     case COMPOUND_PROC:
         [out appendString:@"#<compound-procedure>"];
         break;
@@ -1755,6 +1818,10 @@ void _write(NSMutableString* out, RSObject* obj)
 @end
 
 @implementation RSPrimitiveProc
+
+@end
+
+@implementation RSPrimitiveBlock
 
 @end
 
