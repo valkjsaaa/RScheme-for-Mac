@@ -38,4 +38,32 @@
     _write(_output, result);
 }
 
+- (void)parseMultiline: (NSString *)string error: (NSError * __autoreleasing*)error
+{
+    NSUInteger i = 0;
+    NSUInteger bracket_count = 0;
+    //BOOL hasInput = NO;
+    NSUInteger start = 0;
+    NSUInteger length = string.length;
+    while (i < length){
+        if ([string characterAtIndex:i] == '('){
+            bracket_count++;
+            if (bracket_count == 1){
+                start = i;
+            }
+        }
+        else if ([string characterAtIndex:i] == ')'){
+            bracket_count--;
+            if (!bracket_count){
+                NSString *parseLine = [string substringWithRange:NSMakeRange(start, i-start+1)];
+#ifdef DEBUG
+                NSLog(@"%@", parseLine);
+#endif
+                [self parse:parseLine error:error];
+            }
+        }
+        i++;
+    }
+}
+
 @end

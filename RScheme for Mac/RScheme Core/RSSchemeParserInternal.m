@@ -871,7 +871,7 @@ void _ungetc(NSMutableString* input, unichar c)
 //TODO: Change FILE or NSFileHandle to NSMutableString
 void eat_whitespace(NSMutableString* input)
 {
-    [input setString:[NSMutableString stringWithString:[input stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]]];
+    [input setString:[NSMutableString stringWithString:[input stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]]];
 }
 
 /*

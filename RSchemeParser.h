@@ -14,6 +14,7 @@
 
 - (instancetype)initWithFileHandle:(NSMutableString*)output;
 
+- (void)parseMultiline:(NSString*)string error:(NSError**)error;
 - (void)parse:(NSString*)string error:(NSError**)error;
 
 @end
