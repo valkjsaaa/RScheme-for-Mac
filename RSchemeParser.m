@@ -24,7 +24,7 @@
     if (self) {
         _output = [NSMutableString new];
         _output = output;
-        RSObject *the_global_environment;
+        RSObject* the_global_environment;
         init(output, &the_global_environment);
         _the_global_environment = the_global_environment;
     }
@@ -38,32 +38,33 @@
     _write(_output, result);
 }
 
-- (void)parseMultiline: (NSString *)string error: (NSError * __autoreleasing*)error
+- (void)parseMultiline:(NSString*)string error:(NSError* __autoreleasing*)error
 {
-    NSUInteger i = 0;
-    NSUInteger bracket_count = 0;
-    //BOOL hasInput = NO;
-    NSUInteger start = 0;
-    NSUInteger length = string.length;
-    while (i < length){
-        if ([string characterAtIndex:i] == '('){
-            bracket_count++;
-            if (bracket_count == 1){
-                start = i;
-            }
-        }
-        else if ([string characterAtIndex:i] == ')'){
-            bracket_count--;
-            if (!bracket_count){
-                NSString *parseLine = [string substringWithRange:NSMakeRange(start, i-start+1)];
-#ifdef DEBUG
-                NSLog(@"%@", parseLine);
-#endif
-                [self parse:parseLine error:error];
-            }
-        }
-        i++;
-    }
+    //    NSUInteger i = 0;
+    //    NSUInteger bracket_count = 0;
+    //    //BOOL hasInput = NO;
+    //    NSUInteger start = 0;
+    //    NSUInteger length = string.length;
+    //    while (i < length){
+    //        if ([string characterAtIndex:i] == '('){
+    //            bracket_count++;
+    //            if (bracket_count == 1){
+    //                start = i;
+    //            }
+    //        }
+    //        else if ([string characterAtIndex:i] == ')'){
+    //            bracket_count--;
+    //            if (!bracket_count){
+    //                NSString *parseLine = [string substringWithRange:NSMakeRange(start, i-start+1)];
+    //#ifdef DEBUG
+    //                NSLog(@"%@", parseLine);
+    //#endif
+    //                [self parse:parseLine error:error];
+    //            }
+    //        }
+    //        i++;
+    //    }
+    [self parse:string error:error];
 }
 
 @end

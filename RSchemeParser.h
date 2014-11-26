@@ -10,12 +10,21 @@
 @import Cocoa;
 @import Foundation;
 
+typedef void (^ObjectChangeCallback)(NSString*);
+
 @interface RSchemeParser : NSObject
 
 - (instancetype)initWithFileHandle:(NSMutableString*)output;
 
+- (instancetype)initWithFileHandle:(NSMutableString *)output callback:(ObjectChangeCallback) callback;
+
 - (void)parseMultiline:(NSString*)string error:(NSError**)error;
+
 - (void)parse:(NSString*)string error:(NSError**)error;
+
+- (void)watch: (NSString *) name;
+
+- (void) setSignal:(id)value forKey:(NSString *)key;
 
 @end
 

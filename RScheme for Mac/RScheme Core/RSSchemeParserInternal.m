@@ -533,7 +533,8 @@ RSObject* null_environment_proc(RSObject* arguments)
     return setup_environment();
 }
 
-RSObjectBlock environment_proc(RSObject* the_global_envrionment){
+RSObjectBlock environment_proc(RSObject* the_global_envrionment)
+{
     return [^(RSObject* arugments) {
         return make_environment(the_global_envrionment);
     } copy];
@@ -544,27 +545,6 @@ RSObject* eval_proc(RSObject* arguments)
     NSLog(@"illegal state: The body of the eval primitive procedure should not execute.\n");
     exit(1);
 }
-
-////TODO: Change FILE or NSFileHandle to NSMutableString
-//RSObject* load_proc(RSObject* arguments)
-//{
-//    NSString* filename;
-//    NSString* input;
-//    RSObject* exp;
-//    RSObject* result;
-//
-//    filename = car(arguments).data.string.value;
-//    input = [NSString stringWithContentsOfFile:filename usedEncoding:nil error:nil];
-//    if (input == nil) {
-//        NSLog(@"could not load file \"%@\"", filename);
-//        exit(1);
-//    }
-//
-//    while ((exp = _read([input mutableCopy])) != NULL) {
-//        result = eval(exp, the_global_environment);
-//    }
-//    return result;
-//}
 
 RSObjectBlock load_proc(RSObject* the_global_environment)
 {
@@ -849,13 +829,13 @@ RSObject* make_environment(RSObject* the_global_environment)
 RSObject* make_global_environment()
 {
     RSObject* env;
-    
+
     env = setup_environment();
     populate_environment(env, env);
     return env;
 }
 
-void init(NSMutableString* output, NSObject*__autoreleasing* the_global_environment)
+void init(NSMutableString* output, NSObject* __autoreleasing* the_global_environment)
 {
     standard_output = output;
 
@@ -969,7 +949,6 @@ void peek_expected_delimiter(NSMutableString* input)
     }
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* read_character(NSMutableString* input)
 {
     unichar c;
@@ -998,7 +977,6 @@ RSObject* read_character(NSMutableString* input)
     return make_character(c);
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* read_pair(NSMutableString* input)
 {
     unichar c;
@@ -1043,7 +1021,6 @@ RSObject* read_pair(NSMutableString* input)
     }
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* _read(NSMutableString* input)
 {
     unichar c;
@@ -1676,7 +1653,8 @@ tailcall:
 
         if (is_primitive_proc(procedure)) {
             return (procedure.data.primitive_proc.fn)(arguments);
-        }else if(is_primitive_block(procedure)){
+        }
+        else if (is_primitive_block(procedure)) {
             return (procedure.data.primitive_block.fn)(arguments);
         }
         else if (is_compound_proc(procedure)) {

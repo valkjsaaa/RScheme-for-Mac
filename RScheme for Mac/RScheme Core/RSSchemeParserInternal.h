@@ -273,7 +273,6 @@ RSObject* (^environment_proc(RSObject* arguments))(RSObject* the_global_envrionm
 
 RSObject* eval_proc(RSObject* arguments);
 
-RSObject* _read(NSMutableString* input);
 RSObject* eval(RSObject* exp, RSObject* env);
 
 RSObjectBlock load_proc(RSObject* the_global_envrionment);
@@ -544,27 +543,3 @@ RSObject* eval(RSObject* exp, RSObject* env);
 void write_pair(NSMutableString* out, RSObject* pair);
 
 void _write(NSMutableString* out, RSObject* obj);
-/***************************** REPL ******************************/
-//
-//int main(void) {
-//    RSObject *exp;
-//
-//    printf("Welcome to Bootstrap Scheme. "
-//           "Use ctrl-c to exit.\n");
-//
-//    init();
-//
-//    while (1) {
-//        printf("> ");
-//        exp = read(stdin);
-//        if (exp == NULL) {
-//            break;
-//        }
-//        write(stdout, eval(exp, the_global_environment));
-//        printf("\n");
-//    }
-//
-//    printf("Goodbye\n");
-//
-//    return 0;
-//}
