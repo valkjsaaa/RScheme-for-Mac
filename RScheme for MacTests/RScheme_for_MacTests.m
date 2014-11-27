@@ -82,6 +82,15 @@
     XCTAssert([_output isEqualToString:@"okokokokokokok3.000001ok"], @"Pass");
 }
 
+- (void)testDefine
+{
+    [_output setString:@""];
+    _parser = [[RSchemeParser alloc] initWithFileHandle:_output];
+    [_parser parse:@"(define c (lambda () (define a 1) (define (b) a) b))" error:nil];
+    [_parser parse:@" (write ((c)))" error:nil];
+    XCTAssert([_output isEqualToString:@"ok1ok"]);
+}
+
 - (void)testGUI
 {
     _output = [NSMutableString new];
