@@ -29,6 +29,8 @@
 
 #import "RSSchemeParserInternal.h"
 
+NSMutableString * standard_output;
+
 @implementation RSBoolNumber
 
 @end
@@ -1849,51 +1851,3 @@ void _write(NSMutableString* out, RSObject* obj)
     }
 }
 
-@implementation RSBoolNumber
-
-@end
-
-@implementation RSFloatNumber
-
-@end
-
-@implementation RSFixNumber
-
-@end
-
-@implementation RSPair
-
-@end
-
-@implementation RSString
-
-@end
-
-@implementation RSPrimitiveProc
-
-@end
-
-@implementation RSPrimitiveBlock
-
-@end
-
-@implementation RSCompoundProc
-
-@end
-
-@implementation RSInternalData
-
-@end
-
-@implementation RSObject
-
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-        _data = [RSInternalData new];
-    }
-    return self;
-}
-
-@end
