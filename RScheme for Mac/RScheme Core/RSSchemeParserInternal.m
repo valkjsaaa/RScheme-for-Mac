@@ -29,7 +29,54 @@
 
 #import "RSSchemeParserInternal.h"
 
-NSMutableString* standard_output;
+@implementation RSBoolNumber
+
+@end
+
+@implementation RSFloatNumber
+
+@end
+
+@implementation RSFixNumber
+
+@end
+
+@implementation RSPair
+
+@end
+
+@implementation RSString
+
+@end
+
+@implementation RSPrimitiveProc
+
+@end
+
+@implementation RSPrimitiveBlock
+
+@end
+
+@implementation RSCompoundProc
+
+@end
+
+@implementation RSInternalData
+
+@end
+
+@implementation RSObject
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        _data = [RSInternalData new];
+    }
+    return self;
+}
+
+@end
 
 char is_the_empty_list(RSObject* obj)
 {
@@ -234,8 +281,6 @@ RSObject* is_pair_proc(RSObject* arguments)
 {
     return is_pair(car(arguments)) ? true_value : false_value;
 }
-
-char is_compound_proc(RSObject* obj);
 
 RSObject* is_procedure_proc(RSObject* arguments)
 {
@@ -513,18 +558,10 @@ RSObject* apply_proc(RSObject* arguments)
     exit(1);
 }
 
-////FIXME: this function might not work as expected.
-//RSObject* interaction_environment_proc(RSObject* arguments)
-//{
-//    NSLog(@"this function \"interaction_environment_proc\" is not implemented properly yet.");
-//    return nil;
-//    return the_global_environment;
-//}
-
-RSObjectBlock interaction_environment_proc(RSObject* the_global_envrionment)
+RSObjectBlock interaction_environment_proc(RSObject* the_global_environment)
 {
     return [^(RSObject* arugments) {
-        return the_global_envrionment;
+        return the_global_environment;
     } copy];
 }
 
@@ -533,10 +570,10 @@ RSObject* null_environment_proc(RSObject* arguments)
     return setup_environment();
 }
 
-RSObjectBlock environment_proc(RSObject* the_global_envrionment)
+RSObjectBlock environment_proc(RSObject* the_global_envrionment, NSMutableString* standard_output)
 {
     return [^(RSObject* arugments) {
-        return make_environment(the_global_envrionment);
+        return make_environment(the_global_envrionment, standard_output);
     } copy];
 }
 
@@ -568,24 +605,24 @@ RSObjectBlock load_proc(RSObject* the_global_environment)
     } copy];
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
-RSObject* write_proc(RSObject* arguments)
+RSObjectBlock write_proc(NSMutableString* standard_output)
 {
-    RSObject* exp;
-    NSMutableString* output;
-
-    exp = car(arguments);
-    arguments = cdr(arguments);
-    //    out = is_the_empty_list(arguments) ?
-    //    stdout :
-    //    car(arguments)->data.output_port.stream;
-    //FIXME: only stdout supported!
-    output = standard_output;
-    _write(output, exp);
-    return ok_symbol;
+    return [^(RSObject* arguments) {
+        RSObject* exp;
+        NSMutableString* output;
+        
+        exp = car(arguments);
+        arguments = cdr(arguments);
+        //    out = is_the_empty_list(arguments) ?
+        //    stdout :
+        //    car(arguments)->data.output_port.stream;
+        //FIXME: only stdout supported!
+        output = standard_output;
+        _write(output, exp);
+        return ok_symbol;
+    } copy];
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* error_proc(RSObject* arguments)
 {
     while (!is_the_empty_list(arguments)) {
@@ -743,7 +780,7 @@ RSObject* setup_environment(void)
     return initial_env;
 }
 
-void populate_environment(RSObject* env, RSObject* the_global_environment)
+void populate_environment(RSObject* env, NSMutableString* standard_output)
 {
 
 #define add_procedure(scheme_name, c_name)       \
@@ -795,9 +832,9 @@ void populate_environment(RSObject* env, RSObject* the_global_environment)
     add_procedure(@"apply", apply_proc);
 
     add_block(@"interaction-environment",
-              interaction_environment_proc(the_global_environment));
+              interaction_environment_proc(env));
     add_procedure(@"null-environment", null_environment_proc);
-    add_block(@"environment", environment_proc(the_global_environment));
+    add_block(@"environment", environment_proc(env, standard_output));
     add_procedure(@"eval", eval_proc);
 
     //    add_procedure(@"load", load_proc);
@@ -812,66 +849,67 @@ void populate_environment(RSObject* env, RSObject* the_global_environment)
     //    add_procedure(@"close-output-port", close_output_port_proc);
     //    add_procedure(@"output-port?", is_output_port_proc);
     //    add_procedure(@"write-char", write_char_proc);
-    add_procedure(@"write", write_proc);
+    add_block(@"write", write_proc(standard_output));
 
     add_procedure(@"error", error_proc);
 }
 
-RSObject* make_environment(RSObject* the_global_environment)
+RSObject* make_environment(RSObject* the_global_environment, NSMutableString* standard_output)
 {
     RSObject* env;
 
     env = setup_environment();
-    populate_environment(env, the_global_environment);
+    populate_environment(env, standard_output);
     return env;
 }
 
-RSObject* make_global_environment()
+RSObject* make_global_environment(NSMutableString* standard_output)
 {
     RSObject* env;
 
     env = setup_environment();
-    populate_environment(env, env);
+    populate_environment(env, standard_output);
     return env;
 }
 
-void init(NSMutableString* output, NSObject* __autoreleasing* the_global_environment)
+void init(RSInternalParser* parser)
 {
-    standard_output = output;
 
-    the_empty_list = [RSObject new];
-    the_empty_list.type = THE_EMPTY_LIST;
+    if (the_empty_list != nil) {
+        the_empty_list = [RSObject new];
+        the_empty_list.type = THE_EMPTY_LIST;
 
-    false_value = [RSObject new];
-    false_value.type = BOOLEAN;
-    false_value.data.boolean = [RSBoolNumber new];
-    false_value.data.boolean.value = 0;
+        false_value = [RSObject new];
+        false_value.type = BOOLEAN;
+        false_value.data.boolean = [RSBoolNumber new];
+        false_value.data.boolean.value = 0;
 
-    true_value = [RSObject new];
-    true_value.type = BOOLEAN;
-    true_value.data.boolean = [RSBoolNumber new];
-    true_value.data.boolean.value = 1;
+        true_value = [RSObject new];
+        true_value.type = BOOLEAN;
+        true_value.data.boolean = [RSBoolNumber new];
+        true_value.data.boolean.value = 1;
 
-    symbol_table = the_empty_list;
-    quote_symbol = make_symbol(@"quote");
-    define_symbol = make_symbol(@"define");
-    set_symbol = make_symbol(@"set!");
-    ok_symbol = make_symbol(@"ok");
-    if_symbol = make_symbol(@"if");
-    lambda_symbol = make_symbol(@"lambda");
-    begin_symbol = make_symbol(@"begin");
-    cond_symbol = make_symbol(@"cond");
-    else_symbol = make_symbol(@"else");
-    let_symbol = make_symbol(@"let");
-    and_symbol = make_symbol(@"and");
-    or_symbol = make_symbol(@"or");
+        symbol_table = the_empty_list;
+        quote_symbol = make_symbol(@"quote");
+        define_symbol = make_symbol(@"define");
+        set_symbol = make_symbol(@"set!");
+        ok_symbol = make_symbol(@"ok");
+        if_symbol = make_symbol(@"if");
+        lambda_symbol = make_symbol(@"lambda");
+        begin_symbol = make_symbol(@"begin");
+        cond_symbol = make_symbol(@"cond");
+        else_symbol = make_symbol(@"else");
+        let_symbol = make_symbol(@"let");
+        and_symbol = make_symbol(@"and");
+        or_symbol = make_symbol(@"or");
 
-    //    eof_RSObject = [RSObject new];
-    //    eof_RSObject.type = EOF_OBJECT;
+        //    eof_RSObject = [RSObject new];
+        //    eof_RSObject.type = EOF_OBJECT;
 
-    the_empty_environment = the_empty_list;
+        the_empty_environment = the_empty_list;
+    }
 
-    *the_global_environment = make_global_environment();
+    parser.the_global_environment = make_global_environment(parser.standard_output);
 }
 
 /***************************** READ ******************************/
@@ -910,7 +948,6 @@ void _ungetc(NSMutableString* input, unichar c)
     [input insertString:insert atIndex:0];
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
 void eat_whitespace(NSMutableString* input)
 {
     [input setString:[NSMutableString stringWithString:[input stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]]];
@@ -1676,7 +1713,6 @@ tailcall:
     }
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
 void write_pair(NSMutableString* out, RSObject* pair)
 {
     RSObject* car_obj = car(pair);
@@ -1698,7 +1734,6 @@ void write_pair(NSMutableString* out, RSObject* pair)
     }
 }
 
-//TODO: Change FILE or NSFileHandle to NSMutableString
 void _write(NSMutableString* out, RSObject* obj)
 {
     char c;
@@ -1775,49 +1810,14 @@ void _write(NSMutableString* out, RSObject* obj)
     }
 }
 
-@implementation RSBoolNumber
+@implementation RSInternalParser
 
-@end
-
-@implementation RSFloatNumber
-
-@end
-
-@implementation RSFixNumber
-
-@end
-
-@implementation RSPair
-
-@end
-
-@implementation RSString
-
-@end
-
-@implementation RSPrimitiveProc
-
-@end
-
-@implementation RSPrimitiveBlock
-
-@end
-
-@implementation RSCompoundProc
-
-@end
-
-@implementation RSInternalData
-
-@end
-
-@implementation RSObject
-
-- (instancetype)init
+- (instancetype)initWithOutput:(NSMutableString*)output
 {
     self = [super init];
     if (self) {
-        _data = [RSInternalData new];
+        _standard_output = output;
+        init(self);
     }
     return self;
 }
