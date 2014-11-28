@@ -9,7 +9,8 @@
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
 #import "RSchemeParser.h"
-//#import "y.tab.h"
+#import "y.tab.h"
+#import "MessageBlocks.h"
 
 @interface RScheme_for_MacTests : XCTestCase
 
@@ -101,23 +102,13 @@
 
 - (void)testYyParser
 {
-    /*
     YY_BUFFER_STATE buf;
     
-    buf = yy_scan_string([self.textView.text cStringUsingEncoding:NSUTF8StringEncoding]);
-    
-    ParseTestSuccessBlock = ^(float value) {
-        textView.text = [NSString stringWithFormat:@"%f", value];
-    };
-    
-    ParseTestFailBlock = ^(NSString *msg) {
-        textView.text = msg;
-    };
+    buf = yy_scan_string("(+ 1 2)");
     
     yyparse();
     
     yy_delete_buffer(buf);
-     */
 }
 
 - (void)testPerformanceExample

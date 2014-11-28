@@ -8,6 +8,8 @@
 
 #import "ViewController.h"
 #import "RSchemeParser.h"
+#import "y.tab.h"
+#import "MessageBlocks.h"
 
 #define OUTPUTLINE
 
@@ -42,6 +44,10 @@
     // Update the view, if already loaded.
 }
 
+- (void)test{
+    //NSString *str = [NSString stringWithUTF8String:yytext+2]
+}
+
 - (IBAction)parseButtonClicked:(NSButton *)sender
 {
     NSString *parseString = [self.inputTextField.string substringFromIndex:self.nextParseHeadIndex];
@@ -59,6 +65,7 @@
 #else
     self.outputTextView.string = [self.outputTextView.string stringByAppendingString:self.output];
 #endif
+     
 }
 
 @end

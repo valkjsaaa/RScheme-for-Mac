@@ -76,6 +76,33 @@
     return self;
 }
 
+- (NSString *)description
+{
+    if (!self){
+        return @"nil";
+    }
+    switch (self.type){
+        case THE_EMPTY_LIST:
+            return @"()";
+        case BOOLEAN:
+            return [NSString stringWithFormat:@"BOOLEAN: %ld", self.data.boolean.value];
+        case SYMBOL:
+            return [NSString stringWithFormat:@"SYMBOL: %@", self.data.symbol.value];
+        case FIXNUM:
+            return [NSString stringWithFormat:@"FIXNUM: %ld", self.data.fixnum.value];
+        case FLOATNUM:
+            return [NSString stringWithFormat:@"FLOATNUM: %f", self.data.floatnum.value];
+        case CHARACTER:
+            return [NSString stringWithFormat:@"CHARACTER: %@", self.data.character.value];
+        case STRING:
+            return [NSString stringWithFormat:@"STRING: %@", self.data.string.value];
+        case PAIR:
+            return [NSString stringWithFormat:@"PAIR: (%@ %@)", self.data.pair.car, self.data.pair.cdr];
+        default:
+            return @"else";
+    }
+}
+
 @end
 
 char is_the_empty_list(RSObject* obj)

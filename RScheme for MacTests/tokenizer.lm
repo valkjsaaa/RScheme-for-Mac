@@ -17,7 +17,7 @@
 \#f {yylval.expression = false_value; return _BOOL;}
 \#\\[a-zA-Z] {yylval.expression = read_character([NSMutableString stringWithUTF8String:yytext+2]); return CHAR;}
 
-[a-zA-Z!$%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {yylval.expression = make_symbol([NSString stringWithUTF8String:yytext]); return IDENTIFIER;}
+[a-zA-Z!$%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {NSLog(@"%s", yytext); yylval.expression = make_symbol([NSString stringWithUTF8String:yytext]); return IDENTIFIER;}
 
 \".*\" { yylval.expression = make_string([NSString stringWithFormat:@"\"%s\"",yytext]); return STR;}
 

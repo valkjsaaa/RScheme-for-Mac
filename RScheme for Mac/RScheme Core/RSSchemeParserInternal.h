@@ -139,6 +139,8 @@ char is_symbol(RSObject* obj);
 
 RSObject* make_fixnum(long value);
 
+RSObject* make_floatnum(float value);
+
 char is_fixnum(RSObject* obj);
 
 RSObject* make_character(char value);
