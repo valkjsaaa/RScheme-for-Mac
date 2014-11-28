@@ -12,7 +12,7 @@
 
 @property NSMutableString* output;
 
-@property RSInternalParser* internal_parser;
+@property (strong) RSObject* the_global_environment;
 
 @end
 
@@ -22,8 +22,11 @@
 {
     self = [super init];
     if (self) {
+        _output = [NSMutableString new];
         _output = output;
-        _internal_parser = [[RSInternalParser alloc] initWithOutput:_output];
+        RSObject* the_global_environment;
+        init(output, &the_global_environment);
+        _the_global_environment = the_global_environment;
     }
     return self;
 }
@@ -31,7 +34,7 @@
 - (void)parse:(NSString*)string error:(NSError* __autoreleasing*)error
 {
     RSObject* _exp = _read([string mutableCopy]);
-    RSObject* result = eval(_exp, _internal_parser.the_global_environment);
+    RSObject* result = eval(_exp, _the_global_environment);
     _write(_output, result);
 }
 
