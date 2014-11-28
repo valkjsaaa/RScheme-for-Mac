@@ -1,6 +1,7 @@
 %{
-    
+    #import <Foundation/Foundation.h>
     #import "MessageBlocks.h"
+    #import "RSSchemeParserInternal.h"
     
     int yylex(void);
     void yyerror(char *s);
@@ -8,44 +9,46 @@
 %}
 
 %union {
-    NSNumber* number;
-    NSString* string;
-    NSString* identifier;
-    NSString* expression;
-    NSString* list;
+    long long intValue;
+    double    floatValue;
+    RSObject * test;
+    NSString * string;
+    NSString * identifier;
+    RSObject * expression;
+    NSString * list;
 }
 
-%token <number> NUMBER
+%token <intValue> FIX
+%token <floatValue> FLOAT
 
 %token <identifier> IDENTIFIER
 
-%token <string> STRING
+%token <string> STR
 
 
 %type <expression> expr
-%type <expression> list
-%type <expression> atom
-%type <expression> exprend
+%type <intValue> fix
+%type <floatValue> float
 
 %%
 
-prog : list { if (ParseTestSuccessBlock) ParseTestSuccessBlock($1); }
-
-list: list expr {$$ = [NSString stringWithFormat:@"%@ %@",$1,$2]; }
-| list atom {$$ = [NSString stringWithFormat:@"%@ %@",$1,$2];}
-| expr {$$ = $1;}
-| atom {$$ = $1;printf("acquired!!!");}
+prog : expr {NSLog(@"expr: %@", $1);}
+| expr prog {NSLog(@"expr: %@", $1);}
 ;
 
-expr: '(' exprend {$$ = [NSString stringWithFormat:@"(%@)",$2];}
+expr : fix {$$ = make_fixnum($1.longLongValue); NSLog(@"%@", $$);}
+| '(' '+' expr expr ')' {RSObject *car_obj = make_symbol(@"+"); $$ = cons(car_obj, cons($3, $4));}
+| '(' '-' expr expr ')' {$$ = [NSNumber numberWithDouble:($3.doubleValue + $4.doubleValue)];NSLog(@"%@-%@", $3, $4);}
+| '(' '*' expr expr ')' {$$ = [NSNumber numberWithDouble:($3.doubleValue * $4.doubleValue)];NSLog(@"%@*%@", $3, $4);}
+| '(' '/' expr expr ')' {$$ = [NSNumber numberWithDouble:($3.doubleValue / $4.doubleValue)];NSLog(@"%@/%@", $3, $4);}
+| '('')'   {$$ = 0; NSLog(@"empty_list");}
+| '\'' expr {$$ = $2; NSLog(@"quoted expr");}
 ;
 
-exprend: list ')' {$$ = $1;}
+fix : FIX {$$ = $1; NSLog(@"fix: %lld", $1);}
 ;
 
-atom: NUMBER {$$ = [NSString stringWithFormat:@"%@",$1];}
-| STRING {$$ = [NSString stringWithFormat:@"%@",$1];}
-| IDENTIFIER {$$ = [NSString stringWithFormat:@"%@",$1];}
+float : FLOAT {$$ = $1; NSLog(@"float: %lf", $1);}
 ;
 
 %%

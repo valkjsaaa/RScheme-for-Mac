@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7CC3E74F1A2767B600B73649 /* MessageBlocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CC3E74E1A2767B600B73649 /* MessageBlocks.m */; };
 		8C42F31B1A04DD0C002F7463 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F31A1A04DD0C002F7463 /* AppDelegate.m */; };
 		8C42F31D1A04DD0C002F7463 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F31C1A04DD0C002F7463 /* main.m */; };
 		8C42F3201A04DD0C002F7463 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F31F1A04DD0C002F7463 /* ViewController.m */; };
@@ -28,6 +29,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7CC3E74D1A2767B600B73649 /* MessageBlocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageBlocks.h; sourceTree = "<group>"; };
+		7CC3E74E1A2767B600B73649 /* MessageBlocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageBlocks.m; sourceTree = "<group>"; };
+		7CC3E75F1A27F31000B73649 /* RSchemeForMac.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RSchemeForMac.pch; sourceTree = "<group>"; };
 		8C42F3141A04DD0C002F7463 /* RScheme for Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RScheme for Mac.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C42F3181A04DD0C002F7463 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8C42F3191A04DD0C002F7463 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -121,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				8C42F32F1A04DD0C002F7463 /* Info.plist */,
+				7CC3E75F1A27F31000B73649 /* RSchemeForMac.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -130,6 +135,8 @@
 			children = (
 				8C42F33B1A04DD46002F7463 /* parser.ym */,
 				8C42F33D1A04DD61002F7463 /* tokenizer.lm */,
+				7CC3E74D1A2767B600B73649 /* MessageBlocks.h */,
+				7CC3E74E1A2767B600B73649 /* MessageBlocks.m */,
 				8C42F3421A04F965002F7463 /* RSchemeParser.h */,
 				8C42F33F1A04F943002F7463 /* RSchemeParser.m */,
 				8C42F3431A050D7B002F7463 /* RSSchemeParserInternal.h */,
@@ -237,11 +244,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8C42F31B1A04DD0C002F7463 /* AppDelegate.m in Sources */,
 				8C55AA991A1E64DF005DFB44 /* RSSchemeParserInternal.m in Sources */,
 				8C42F3201A04DD0C002F7463 /* ViewController.m in Sources */,
 				8C42F31D1A04DD0C002F7463 /* main.m in Sources */,
+				7CC3E74F1A2767B600B73649 /* MessageBlocks.m in Sources */,
 				8C42F3401A04F943002F7463 /* RSchemeParser.m in Sources */,
-				8C42F31B1A04DD0C002F7463 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,6 +364,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_INPUT_FILETYPE = automatic;
 				INFOPLIST_FILE = "RScheme for Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -367,6 +376,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_INPUT_FILETYPE = automatic;
 				INFOPLIST_FILE = "RScheme for Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -1,7 +1,7 @@
 %{
     
     #import "y.tab.h"
-    #import "RSSchemeParserInternal.h"
+    #import "MessageBlocks.h"
     
     void yyerror(char *s);
     
@@ -9,12 +9,13 @@
 
 %%
 
-[0-9]+\.[0-9]* { yylval.number = [NSNumber numberWithDouble:atof(yytext)]; return NUMBER; }
-[0-9]+ { yylval.number = [NSNumber numberWithDouble:atof(yytext)]; return NUMBER; }
-\".*\" { yylval.string = [NSString stringWithFormat:@"\"%s\"",yytext]; return STRING;}
+-?[0-9]+\.[0-9]* { yylval.floatValue = atof(yytext); return FLOAT; }
+
+-?[0-9]+ { yylval.intValue = atoi(yytext); return FIX; }
+
+\".*\" { yylval.string = [NSString stringWithFormat:@"\"%s\"",yytext]; return STR;}
+
 [a-zA-Z][a-zA-Z0-9]* { yylval.identifier = [NSString stringWithFormat:@"%s", yytext]; return IDENTIFIER; }
-
-
 
 [\n\t ] { }
 
