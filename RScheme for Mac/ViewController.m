@@ -31,8 +31,6 @@
     self.output = [[NSMutableString alloc] initWithString:@""];
     self.parser = [[RSchemeParser alloc] initWithFileHandle:self.output];
     self.nextParseHeadIndex = 0;
-    [self.inputTextField setAutomaticQuoteSubstitutionEnabled:NO];
-    [self.outputTextView setAutomaticQuoteSubstitutionEnabled:NO];
     //self.nextResultHeadIndex = 0;
     // Do any additional setup after loading the view.
 }

@@ -129,7 +129,7 @@ RSObject* make_symbol(NSString* value)
 {
     RSObject* obj;
     RSObject* element;
-
+    
     /* search for they symbol input the symbol table */
     element = symbol_table;
     while (!is_the_empty_list(element)) {
@@ -138,7 +138,7 @@ RSObject* make_symbol(NSString* value)
         }
         element = cdr(element);
     };
-
+    
     /* create the symbol and add it to the symbol table */
     obj = [RSObject new];
     obj.type = SYMBOL;
@@ -309,10 +309,12 @@ RSObject* is_pair_proc(RSObject* arguments)
     return is_pair(car(arguments)) ? true_value : false_value;
 }
 
+char is_compound_proc(RSObject* obj);
+
 RSObject* is_procedure_proc(RSObject* arguments)
 {
     RSObject* obj;
-
+    
     obj = car(arguments);
     return (is_primitive_proc(obj) || is_compound_proc(obj) || is_primitive_block(obj)) ? true_value : false_value;
 }
@@ -455,7 +457,7 @@ RSObject* quotient_proc(RSObject* arguments)
     }
     else {
         return make_fixnum(
-            ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
+                           ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
     }
 }
 
@@ -468,14 +470,14 @@ RSObject* remainder_proc(RSObject* arguments)
     }
     else {
         return make_fixnum(
-            ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
+                           ((car(arguments)).data.fixnum.value) / ((cadr(arguments)).data.fixnum.value));
     }
 }
 
 RSObject* is_number_equal_proc(RSObject* arguments)
 {
     float value;
-
+    
     value = get_float(car(arguments));
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         if (value != get_float(car(arguments))) {
@@ -489,7 +491,7 @@ RSObject* is_less_than_proc(RSObject* arguments)
 {
     float previous;
     float next;
-
+    
     previous = get_float(car(arguments));
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         next = get_float(car(arguments));
@@ -507,7 +509,7 @@ RSObject* is_greater_than_proc(RSObject* arguments)
 {
     float previous;
     float next;
-
+    
     previous = get_float(car(arguments));
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         next = get_float(car(arguments));
@@ -557,25 +559,25 @@ RSObject* is_eq_proc(RSObject* arguments)
 {
     RSObject* obj1;
     RSObject* obj2;
-
+    
     obj1 = car(arguments);
     obj2 = cadr(arguments);
-
+    
     if (obj1.type != obj2.type) {
         return false_value;
     }
     switch (obj1.type) {
-    case FIXNUM:
-        return (obj1.data.fixnum.value == obj2.data.fixnum.value) ? true_value : false_value;
-        break;
-    case CHARACTER:
-        return (obj1.data.character.value == obj2.data.character.value) ? true_value : false_value;
-        break;
-    case STRING:
-        return ([obj1.data.string.value isEqualToString:obj2.data.string.value]) ? true_value : false_value;
-        break;
-    default:
-        return (obj1 == obj2) ? true_value : false_value;
+        case FIXNUM:
+            return (obj1.data.fixnum.value == obj2.data.fixnum.value) ? true_value : false_value;
+            break;
+        case CHARACTER:
+            return (obj1.data.character.value == obj2.data.character.value) ? true_value : false_value;
+            break;
+        case STRING:
+            return ([obj1.data.string.value isEqualToString:obj2.data.string.value]) ? true_value : false_value;
+            break;
+        default:
+            return (obj1 == obj2) ? true_value : false_value;
     }
 }
 
@@ -585,10 +587,18 @@ RSObject* apply_proc(RSObject* arguments)
     exit(1);
 }
 
-RSObjectBlock interaction_environment_proc(RSObject* the_global_environment)
+////FIXME: this function might not work as expected.
+//RSObject* interaction_environment_proc(RSObject* arguments)
+//{
+//    NSLog(@"this function \"interaction_environment_proc\" is not implemented properly yet.");
+//    return nil;
+//    return the_global_environment;
+//}
+
+RSObjectBlock interaction_environment_proc(RSObject* the_global_envrionment)
 {
     return [^(RSObject* arugments) {
-        return the_global_environment;
+        return the_global_envrionment;
     } copy];
 }
 
@@ -597,10 +607,10 @@ RSObject* null_environment_proc(RSObject* arguments)
     return setup_environment();
 }
 
-RSObjectBlock environment_proc(RSObject* the_global_envrionment, NSMutableString* standard_output)
+RSObjectBlock environment_proc(RSObject* the_global_envrionment)
 {
     return [^(RSObject* arugments) {
-        return make_environment(the_global_envrionment, standard_output);
+        return make_environment(the_global_envrionment);
     } copy];
 }
 
@@ -632,24 +642,24 @@ RSObjectBlock load_proc(RSObject* the_global_environment)
     } copy];
 }
 
-RSObjectBlock write_proc(NSMutableString* standard_output)
+//TODO: Change FILE or NSFileHandle to NSMutableString
+RSObject* write_proc(RSObject* arguments)
 {
-    return [^(RSObject* arguments) {
-        RSObject* exp;
-        NSMutableString* output;
-        
-        exp = car(arguments);
-        arguments = cdr(arguments);
-        //    out = is_the_empty_list(arguments) ?
-        //    stdout :
-        //    car(arguments)->data.output_port.stream;
-        //FIXME: only stdout supported!
-        output = standard_output;
-        _write(output, exp);
-        return ok_symbol;
-    } copy];
+    RSObject* exp;
+    NSMutableString* output;
+    
+    exp = car(arguments);
+    arguments = cdr(arguments);
+    //    out = is_the_empty_list(arguments) ?
+    //    stdout :
+    //    car(arguments)->data.output_port.stream;
+    //FIXME: only stdout supported!
+    output = standard_output;
+    _write(output, exp);
+    return ok_symbol;
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 RSObject* error_proc(RSObject* arguments)
 {
     while (!is_the_empty_list(arguments)) {
@@ -666,7 +676,7 @@ RSObject* make_compound_proc(RSObject* parameters, RSObject* body,
                              RSObject* env)
 {
     RSObject* obj;
-
+    
     obj = [RSObject new];
     obj.type = COMPOUND_PROC;
     obj.data.compound_proc = [RSCompoundProc new];
@@ -756,7 +766,7 @@ void set_variable_value(RSObject* var, RSObject* val, RSObject* env)
     RSObject* frame;
     RSObject* vars;
     RSObject* vals;
-
+    
     while (!is_the_empty_list(env)) {
         frame = first_frame(env);
         vars = frame_variables(frame);
@@ -780,11 +790,11 @@ void define_variable(RSObject* var, RSObject* val, RSObject* env)
     RSObject* frame;
     RSObject* vars;
     RSObject* vals;
-
+    
     frame = first_frame(env);
     vars = frame_variables(frame);
     vals = frame_values(frame);
-
+    
     while (!is_the_empty_list(vars)) {
         if (var == car(vars)) {
             set_car(vals, val);
@@ -799,27 +809,27 @@ void define_variable(RSObject* var, RSObject* val, RSObject* env)
 RSObject* setup_environment(void)
 {
     RSObject* initial_env;
-
+    
     initial_env = extend_environment(
-        the_empty_list,
-        the_empty_list,
-        the_empty_environment);
+                                     the_empty_list,
+                                     the_empty_list,
+                                     the_empty_environment);
     return initial_env;
 }
 
-void populate_environment(RSObject* env, NSMutableString* standard_output)
+void populate_environment(RSObject* env, RSObject* the_global_environment)
 {
-
+    
 #define add_procedure(scheme_name, c_name)       \
-    define_variable(make_symbol(scheme_name),    \
-                    make_primitive_proc(c_name), \
-                    env);
-
+define_variable(make_symbol(scheme_name),    \
+make_primitive_proc(c_name), \
+env);
+    
 #define add_block(scheme_name, c_name)            \
-    define_variable(make_symbol(scheme_name),     \
-                    make_primitive_block(c_name), \
-                    env);
-
+define_variable(make_symbol(scheme_name),     \
+make_primitive_block(c_name), \
+env);
+    
     add_procedure(@"null?", is_null_proc);
     add_procedure(@"boolean?", is_boolean_proc);
     add_procedure(@"symbol?", is_symbol_proc);
@@ -828,14 +838,14 @@ void populate_environment(RSObject* env, NSMutableString* standard_output)
     add_procedure(@"string?", is_string_proc);
     add_procedure(@"pair?", is_pair_proc);
     add_procedure(@"procedure?", is_procedure_proc);
-
+    
     add_procedure(@"char.integer", char_to_integer_proc);
     add_procedure(@"integer.char", integer_to_char_proc);
     add_procedure(@"number.string", number_to_string_proc);
     add_procedure(@"string.number", string_to_number_proc);
     add_procedure(@"symbol.string", symbol_to_string_proc);
     add_procedure(@"string.symbol", string_to_symbol_proc);
-
+    
     add_procedure(@"+", add_proc);
     add_procedure(@"-", sub_proc);
     add_procedure(@"*", mul_proc);
@@ -846,24 +856,24 @@ void populate_environment(RSObject* env, NSMutableString* standard_output)
     add_procedure(@"=", is_number_equal_proc);
     add_procedure(@"<", is_less_than_proc);
     add_procedure(@">", is_greater_than_proc);
-
+    
     add_procedure(@"cons", cons_proc);
     add_procedure(@"car", car_proc);
     add_procedure(@"cdr", cdr_proc);
     add_procedure(@"set-car!", set_car_proc);
     add_procedure(@"set-cdr!", set_cdr_proc);
     add_procedure(@"list", list_proc);
-
+    
     add_procedure(@"eq?", is_eq_proc);
-
+    
     add_procedure(@"apply", apply_proc);
-
+    
     add_block(@"interaction-environment",
-              interaction_environment_proc(env));
+              interaction_environment_proc(the_global_environment));
     add_procedure(@"null-environment", null_environment_proc);
-    add_block(@"environment", environment_proc(env, standard_output));
+    add_block(@"environment", environment_proc(the_global_environment));
     add_procedure(@"eval", eval_proc);
-
+    
     //    add_procedure(@"load", load_proc);
     //    add_procedure(@"open-input-port", open_input_port_proc);
     //    add_procedure(@"close-input-port", close_input_port_proc);
@@ -876,67 +886,66 @@ void populate_environment(RSObject* env, NSMutableString* standard_output)
     //    add_procedure(@"close-output-port", close_output_port_proc);
     //    add_procedure(@"output-port?", is_output_port_proc);
     //    add_procedure(@"write-char", write_char_proc);
-    add_block(@"write", write_proc(standard_output));
-
+    add_procedure(@"write", write_proc);
+    
     add_procedure(@"error", error_proc);
 }
 
-RSObject* make_environment(RSObject* the_global_environment, NSMutableString* standard_output)
+RSObject* make_environment(RSObject* the_global_environment)
 {
     RSObject* env;
-
+    
     env = setup_environment();
-    populate_environment(env, standard_output);
+    populate_environment(env, the_global_environment);
     return env;
 }
 
-RSObject* make_global_environment(NSMutableString* standard_output)
+RSObject* make_global_environment()
 {
     RSObject* env;
-
+    
     env = setup_environment();
-    populate_environment(env, standard_output);
+    populate_environment(env, env);
     return env;
 }
 
-void init(RSInternalParser* parser)
+void init(NSMutableString* output, NSObject* __autoreleasing* the_global_environment)
 {
-
-    if (the_empty_list != nil) {
-        the_empty_list = [RSObject new];
-        the_empty_list.type = THE_EMPTY_LIST;
-
-        false_value = [RSObject new];
-        false_value.type = BOOLEAN;
-        false_value.data.boolean = [RSBoolNumber new];
-        false_value.data.boolean.value = 0;
-
-        true_value = [RSObject new];
-        true_value.type = BOOLEAN;
-        true_value.data.boolean = [RSBoolNumber new];
-        true_value.data.boolean.value = 1;
-
-        symbol_table = the_empty_list;
-        quote_symbol = make_symbol(@"quote");
-        define_symbol = make_symbol(@"define");
-        set_symbol = make_symbol(@"set!");
-        ok_symbol = make_symbol(@"ok");
-        if_symbol = make_symbol(@"if");
-        lambda_symbol = make_symbol(@"lambda");
-        begin_symbol = make_symbol(@"begin");
-        cond_symbol = make_symbol(@"cond");
-        else_symbol = make_symbol(@"else");
-        let_symbol = make_symbol(@"let");
-        and_symbol = make_symbol(@"and");
-        or_symbol = make_symbol(@"or");
-
-        //    eof_RSObject = [RSObject new];
-        //    eof_RSObject.type = EOF_OBJECT;
-
-        the_empty_environment = the_empty_list;
-    }
-
-    parser.the_global_environment = make_global_environment(parser.standard_output);
+    standard_output = output;
+    
+    the_empty_list = [RSObject new];
+    the_empty_list.type = THE_EMPTY_LIST;
+    
+    false_value = [RSObject new];
+    false_value.type = BOOLEAN;
+    false_value.data.boolean = [RSBoolNumber new];
+    false_value.data.boolean.value = 0;
+    
+    true_value = [RSObject new];
+    true_value.type = BOOLEAN;
+    true_value.data.boolean = [RSBoolNumber new];
+    true_value.data.boolean.value = 1;
+    
+    symbol_table = the_empty_list;
+    quote_symbol = make_symbol(@"quote");
+    define_symbol = make_symbol(@"define");
+    set_symbol = make_symbol(@"set!");
+    ok_symbol = make_symbol(@"ok");
+    if_symbol = make_symbol(@"if");
+    lambda_symbol = make_symbol(@"lambda");
+    begin_symbol = make_symbol(@"begin");
+    cond_symbol = make_symbol(@"cond");
+    else_symbol = make_symbol(@"else");
+    let_symbol = make_symbol(@"let");
+    and_symbol = make_symbol(@"and");
+    or_symbol = make_symbol(@"or");
+    
+    //    eof_RSObject = [RSObject new];
+    //    eof_RSObject.type = EOF_OBJECT;
+    
+    the_empty_environment = the_empty_list;
+    
+    *the_global_environment = make_global_environment();
 }
 
 /***************************** READ ******************************/
@@ -975,10 +984,26 @@ void _ungetc(NSMutableString* input, unichar c)
     [input insertString:insert atIndex:0];
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 void eat_whitespace(NSMutableString* input)
 {
     [input setString:[NSMutableString stringWithString:[input stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]]];
 }
+
+/*
+ void eat_expected_string(FILE* input, char* str)
+ {
+ unichar c;
+ 
+ while (*str != '\0') {
+ c = getc(input);
+ if (c != *str) {
+ fprintf(stderr, "unexpected character '%c'\n", c);
+ exit(1);
+ }
+ str++;
+ }
+ }*/
 
 void eat_expected_string(NSMutableString* input, NSString* str)
 {
@@ -1002,25 +1027,25 @@ RSObject* read_character(NSMutableString* input)
 {
     unichar c;
     c = _getc(input);
-
+    
     switch (c) {
-    case (unichar) EOF:
-        fprintf(stderr, "incomplete character literal\n");
-        exit(1);
-    case 's':
-        if ([input characterAtIndex:0] == 'p') {
-            eat_expected_string(input, @"pace");
-            peek_expected_delimiter(input);
-            return make_character(' ');
-        }
-        break;
-    case 'n':
-        if (peek(input) == 'e') {
-            eat_expected_string(input, @"ewline");
-            peek_expected_delimiter(input);
-            return make_character('\n');
-        }
-        break;
+        case (unichar) EOF:
+            fprintf(stderr, "incomplete character literal\n");
+            exit(1);
+        case 's':
+            if ([input characterAtIndex:0] == 'p') {
+                eat_expected_string(input, @"pace");
+                peek_expected_delimiter(input);
+                return make_character(' ');
+            }
+            break;
+        case 'n':
+            if (peek(input) == 'e') {
+                eat_expected_string(input, @"ewline");
+                peek_expected_delimiter(input);
+                return make_character('\n');
+            }
+            break;
     }
     peek_expected_delimiter(input);
     return make_character(c);
@@ -1031,21 +1056,21 @@ RSObject* read_pair(NSMutableString* input)
     unichar c;
     RSObject* car_obj;
     RSObject* cdr_obj;
-
+    
     //[input eatWhiteSpace];
     eat_whitespace(input);
-
+    
     c = _getc(input);
     if (c == ')') { //read the empty list
         return the_empty_list;
     }
     _ungetc(input, c);
-
+    
     car_obj = _read(input);
-
+    
     //[input eatWhiteSpace];
     eat_whitespace(input);
-
+    
     c = _getc(input);
     if (c == '.') { // read improper list
         c = peek(input);
@@ -1075,31 +1100,31 @@ RSObject* _read(NSMutableString* input)
     unichar c;
     //    short sign = 1;
     int i;
-//    long num = 0;
-
+    //    long num = 0;
+    
 #define BUFFER_MAX 1000
     NSMutableString* buffer = [[NSMutableString alloc] init];
-
+    
     //[input eatWhiteSpace];
     eat_whitespace(input);
-
+    
     c = _getc(input);
-
+    
     if (c == '#') { // read a boolean or character
         c = _getc(input);
         switch (c) {
-        case 't':
-            return true_value;
-        case 'f':
-            return false_value;
-        case '\\':
-            //TODO: implemented read_character function input objective c style
-            //return read_character((__bridge FILE *)(input));
-            return THE_EMPTY_LIST;
-        default:
-            fprintf(stderr,
-                    "unknown boolean or character literal\n");
-            exit(1);
+            case 't':
+                return true_value;
+            case 'f':
+                return false_value;
+            case '\\':
+                //TODO: implemented read_character function input objective c style
+                //return read_character((__bridge FILE *)(input));
+                return THE_EMPTY_LIST;
+            default:
+                fprintf(stderr,
+                        "unknown boolean or character literal\n");
+                exit(1);
         }
     }
     else if (isdigit(c) || (c == '-' && isdigit(peek(input)))) {
@@ -1150,7 +1175,7 @@ RSObject* _read(NSMutableString* input)
             }
             else {
                 fprintf(stderr, "symbol too long. "
-                                "Maximum length is %d\n",
+                        "Maximum length is %d\n",
                         BUFFER_MAX);
                 exit(1);
             }
@@ -1162,7 +1187,7 @@ RSObject* _read(NSMutableString* input)
         }
         else {
             fprintf(stderr, "symbol not followed by delimiter. "
-                            "Found %c\n",
+                    "Found %c\n",
                     c);
             exit(1);
         }
@@ -1187,7 +1212,7 @@ RSObject* _read(NSMutableString* input)
             }
             else {
                 fprintf(stderr, "symbol too long. "
-                                "Maximum length is %d\n",
+                        "Maximum length is %d\n",
                         BUFFER_MAX);
                 exit(1);
             }
@@ -1222,7 +1247,7 @@ char is_variable(RSObject* expression)
 char is_tagged_list(RSObject* expression, RSObject* tag)
 {
     RSObject* the_car;
-
+    
     if (is_pair(expression)) {
         the_car = car(expression);
         return is_symbol(the_car) && (the_car == tag);
@@ -1408,7 +1433,7 @@ RSObject* expand_clauses(RSObject* clauses)
 {
     RSObject* first;
     RSObject* rest;
-
+    
     if (is_the_empty_list(clauses)) {
         return false;
     }
@@ -1522,9 +1547,9 @@ RSObject* let_arguments(RSObject* exp)
 RSObject* let_to_application(RSObject* exp)
 {
     return make_application(
-        make_lambda(let_parameters(exp),
-                    let_body(exp)),
-        let_arguments(exp));
+                            make_lambda(let_parameters(exp),
+                                        let_body(exp)),
+                            let_arguments(exp));
 }
 
 char is_and(RSObject* exp)
@@ -1610,7 +1635,7 @@ RSObject* eval(RSObject* exp, RSObject* env)
     RSObject* procedure;
     RSObject* arguments;
     RSObject* result;
-
+    
 tailcall:
     if (is_self_evaluating(exp)) {
         return exp;
@@ -1686,20 +1711,20 @@ tailcall:
     else if (is_application(exp)) {
         procedure = eval(operator(exp), env);
         arguments = list_of_values(operands(exp), env);
-
+        
         /* handle eval specially for tail call requirement */
         if (is_primitive_proc(procedure) && procedure.data.primitive_proc.fn == eval_proc) {
             exp = eval_expression(arguments);
             env = eval_environment(arguments);
             goto tailcall;
         }
-
+        
         /* handle apply specially for tail call requirement */
         if (is_primitive_proc(procedure) && procedure.data.primitive_proc.fn == apply_proc) {
             procedure = apply_operator(arguments);
             arguments = apply_operands(arguments);
         }
-
+        
         if (is_primitive_proc(procedure)) {
             return (procedure.data.primitive_proc.fn)(arguments);
         }
@@ -1708,9 +1733,9 @@ tailcall:
         }
         else if (is_compound_proc(procedure)) {
             env = extend_environment(
-                procedure.data.compound_proc.parameters,
-                arguments,
-                procedure.data.compound_proc.env);
+                                     procedure.data.compound_proc.parameters,
+                                     arguments,
+                                     procedure.data.compound_proc.env);
             exp = make_begin(procedure.data.compound_proc.body);
             goto tailcall;
         }
@@ -1725,11 +1750,12 @@ tailcall:
     }
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 void write_pair(NSMutableString* out, RSObject* pair)
 {
     RSObject* car_obj = car(pair);
     RSObject* cdr_obj = cdr(pair);
-
+    
     _write(out, car_obj);
     if (cdr_obj.type == PAIR) {
         //[out writeData:[NSData dataWithBytes:" " length:1]];
@@ -1746,90 +1772,126 @@ void write_pair(NSMutableString* out, RSObject* pair)
     }
 }
 
+//TODO: Change FILE or NSFileHandle to NSMutableString
 void _write(NSMutableString* out, RSObject* obj)
 {
     char c;
     NSString* str = [[NSString alloc] init];
-
+    
     switch (obj.type) {
-    case THE_EMPTY_LIST:
-        [out appendString:@"()"];
-        break;
-    case BOOLEAN:
-        [out appendString:is_false(obj) ? @"f" : @"t"];
-        break;
-    case SYMBOL:
-        [out appendString:obj.data.symbol.value];
-        break;
-    case FIXNUM:
-        [out appendString:[NSString stringWithFormat:@"%ld", obj.data.fixnum.value]];
-        break;
-    case FLOATNUM:
-        [out appendString:[NSString stringWithFormat:@"%lf", obj.data.floatnum.value]];
-        break;
-    case CHARACTER:
-        c = [obj.data.character.value characterAtIndex:0];
-        [out appendString:@"#\\"];
-        switch (c) {
-        case '\n':
-            [out appendString:@"newline"];
+        case THE_EMPTY_LIST:
+            [out appendString:@"()"];
             break;
-        case ' ':
-            [out appendString:@"space"];
+        case BOOLEAN:
+            [out appendString:is_false(obj) ? @"f" : @"t"];
+            break;
+        case SYMBOL:
+            [out appendString:obj.data.symbol.value];
+            break;
+        case FIXNUM:
+            [out appendString:[NSString stringWithFormat:@"%ld", obj.data.fixnum.value]];
+            break;
+        case FLOATNUM:
+            [out appendString:[NSString stringWithFormat:@"%lf", obj.data.floatnum.value]];
+            break;
+        case CHARACTER:
+            c = [obj.data.character.value characterAtIndex:0];
+            [out appendString:@"#\\"];
+            switch (c) {
+                case '\n':
+                    [out appendString:@"newline"];
+                    break;
+                case ' ':
+                    [out appendString:@"space"];
+                    break;
+                default:
+                    [out appendString:[NSString stringWithFormat:@"%c", c]];
+            }
+            break;
+        case STRING:
+            str = obj.data.string.value;
+            [out appendString:[NSString stringWithFormat:@"%c", '"']];
+            for (int i = 0; i < str.length; i++) {
+                switch (c = [str characterAtIndex:i]) {
+                    case '\n':
+                        [out appendString:@"\n"];
+                        break;
+                    case '\\':
+                        [out appendString:@"\\\\"];
+                        break;
+                    case '"':
+                        [out appendString:@"\\\""];
+                        break;
+                    default:
+                        [out appendString:[NSString stringWithFormat:@"%c", c]];
+                        break;
+                }
+            }
+            [out appendString:[NSString stringWithFormat:@"%c", '"']];
+            break;
+        case PAIR:
+            [out appendString:@"("];
+            write_pair(out, obj);
+            [out appendString:@")"];
+            break;
+        case PRIMITIVE_PROC:
+            [out appendString:@"#<primitive-procedure>"];
+            break;
+        case PRIMITIVE_BLOCK:
+            [out appendString:@"#<primitive-procedure>"];
+            break;
+        case COMPOUND_PROC:
+            [out appendString:@"#<compound-procedure>"];
             break;
         default:
-            [out appendString:[NSString stringWithFormat:@"%c", c]];
-        }
-        break;
-    case STRING:
-        str = obj.data.string.value;
-        [out appendString:[NSString stringWithFormat:@"%c", '"']];
-        for (int i = 0; i < str.length; i++) {
-            switch (c = [str characterAtIndex:i]) {
-            case '\n':
-                [out appendString:@"\n"];
-                break;
-            case '\\':
-                [out appendString:@"\\\\"];
-                break;
-            case '"':
-                [out appendString:@"\\\""];
-                break;
-            default:
-                [out appendString:[NSString stringWithFormat:@"%c", c]];
-                break;
-            }
-        }
-        [out appendString:[NSString stringWithFormat:@"%c", '"']];
-        break;
-    case PAIR:
-        [out appendString:@"("];
-        write_pair(out, obj);
-        [out appendString:@")"];
-        break;
-    case PRIMITIVE_PROC:
-        [out appendString:@"#<primitive-procedure>"];
-        break;
-    case PRIMITIVE_BLOCK:
-        [out appendString:@"#<primitive-procedure>"];
-        break;
-    case COMPOUND_PROC:
-        [out appendString:@"#<compound-procedure>"];
-        break;
-    default:
-        fprintf(stderr, "cannot write unknown type\n");
-        exit(1);
+            fprintf(stderr, "cannot write unknown type\n");
+            exit(1);
     }
 }
 
-@implementation RSInternalParser
+@implementation RSBoolNumber
 
-- (instancetype)initWithOutput:(NSMutableString*)output
+@end
+
+@implementation RSFloatNumber
+
+@end
+
+@implementation RSFixNumber
+
+@end
+
+@implementation RSPair
+
+@end
+
+@implementation RSString
+
+@end
+
+@implementation RSPrimitiveProc
+
+@end
+
+@implementation RSPrimitiveBlock
+
+@end
+
+@implementation RSCompoundProc
+
+@end
+
+@implementation RSInternalData
+
+@end
+
+@implementation RSObject
+
+- (instancetype)init
 {
     self = [super init];
     if (self) {
-        _standard_output = output;
-        init(self);
+        _data = [RSInternalData new];
     }
     return self;
 }

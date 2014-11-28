@@ -80,18 +80,18 @@
 @end
 
 typedef enum : NSUInteger {
-                   THE_EMPTY_LIST,
-                   BOOLEAN,
-                   SYMBOL,
-                   FIXNUM,
-                   FLOATNUM,
-                   CHARACTER,
-                   STRING,
-                   PAIR,
-                   PRIMITIVE_PROC,
-                   PRIMITIVE_BLOCK,
-                   COMPOUND_PROC,
-               } RSObjectType;
+    THE_EMPTY_LIST,
+    BOOLEAN,
+    SYMBOL,
+    FIXNUM,
+    FLOATNUM,
+    CHARACTER,
+    STRING,
+    PAIR,
+    PRIMITIVE_PROC,
+    PRIMITIVE_BLOCK,
+    COMPOUND_PROC,
+} RSObjectType;
 
 @interface RSObject : NSObject
 - (instancetype)init;
@@ -218,6 +218,7 @@ char is_compound_proc(RSObject* obj);
 
 RSObject* is_procedure_proc(RSObject* arguments);
 
+//??? seems not right
 RSObject* char_to_integer_proc(RSObject* arguments);
 
 RSObject* integer_to_char_proc(RSObject* arguments);
@@ -268,7 +269,9 @@ RSObject* setup_environment(void);
 
 RSObject* null_environment_proc(RSObject* arguments);
 
-RSObjectBlock environment_proc(RSObject* the_global_envrionment, NSMutableString* standard_output);
+RSObject* make_environment(RSObject* the_global_environment);
+
+RSObject* (^environment_proc(RSObject* arguments))(RSObject* the_global_envrionment);
 
 RSObject* eval_proc(RSObject* arguments);
 
@@ -322,7 +325,7 @@ char is_eof_RSObject(RSObject* obj);
 
 void _write(NSMutableString* out, RSObject* obj);
 
-RSObjectBlock write_proc(NSMutableString* arguments);
+RSObject* write_proc(RSObject* arguments);
 
 RSObject* error_proc(RSObject* arguments);
 
@@ -365,13 +368,11 @@ void define_variable(RSObject* var, RSObject* val, RSObject* env);
 
 RSObject* setup_environment(void);
 
-void populate_environment(RSObject* env, NSMutableString* standard_output);
+void populate_environment(RSObject* env, RSObject* the_global_environment);
 
-RSObject* make_environment(RSObject* the_global_environment, NSMutableString* standard_output);
+RSObject* make_environment(RSObject* the_global_environment);
 
-@class RSInternalParser;
-
-void init(RSInternalParser* parser);
+void init(NSMutableString* output, NSObject** the_global_environment);
 
 /***************************** READ ******************************/
 
@@ -380,6 +381,24 @@ char is_delimiter(unichar c);
 char is_initial(unichar c);
 
 int peek(NSMutableString* input);
+
+//void eat_whitespace(FILE* input)
+//{
+//    int c;
+//
+//    while ((c = getc(input)) != EOF) {
+//        if (isspace(c)) {
+//            continue;
+//        }
+//        else if (c == ';') { /* comments are whitespace also */
+//            while (((c = getc(input)) != EOF) && (c != '\n'))
+//                ;
+//            continue;
+//        }
+//        ungetc(c, input);
+//        break;
+//    }
+//}
 
 void eat_whitespace(NSMutableString* input);
 
@@ -526,13 +545,3 @@ RSObject* eval(RSObject* exp, RSObject* env);
 void write_pair(NSMutableString* out, RSObject* pair);
 
 void _write(NSMutableString* out, RSObject* obj);
-
-@interface RSInternalParser : NSObject
-
-@property NSMutableString* standard_output;
-
-@property RSObject* the_global_environment;
-
-- (instancetype)initWithOutput:(NSMutableString*)output;
-
-@end
