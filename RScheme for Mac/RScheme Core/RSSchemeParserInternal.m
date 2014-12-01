@@ -1638,6 +1638,8 @@ RSObject* eval(RSObject* exp, RSObject* env)
     RSObject* arguments;
     RSObject* result;
     
+    // when comes in eval, the AST (RSObject *exp) is the least one strong pointer point to all work done by bison, which ensure the ARC
+    tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];
 tailcall:
     if (is_self_evaluating(exp)) {
         return exp;

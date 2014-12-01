@@ -1,13 +1,17 @@
+
 %{
     #import <Foundation/Foundation.h>
     #import "MessageBlocks.h"
     #import "RSSchemeParserInternal.h"
     
     int yylex(void);
-    void yyerror(char *s);
+    extern NSMutableArray * tmpRSObjectRetainedBuffer;
+    RSObject * tmpRSObject;
+    void yyerror(YYParserParams *params, char *s);
     
 %}
 
+%parse-param {YYParserParams *params}
 %union {
     __unsafe_unretained RSObject * expression;
 }
@@ -25,12 +29,12 @@
 %type <expression> pair
 %%
 
-prog : expr {NSLog(@"expr: %@", $1);}
+prog : expr {NSLog(@"expr: %@", $1); _write(outputString, eval($1, env));}
 | expr prog {NSLog(@"expr: %@", $1);}
 ;
 
 expr : '(' pair {$$ = $2;}
-| '\'' expr {$$ = cons(quote_symbol, cons($2, the_empty_list)); NSLog(@"quoted");}
+| '\'' expr {tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; NSLog(@"quoted");}
 | FLOAT {$$ = $1;}
 | FIX {$$ = $1;}
 | _BOOL {$$ = $1;}
@@ -38,7 +42,7 @@ expr : '(' pair {$$ = $2;}
 | IDENTIFIER {$$ = $1;}
 ;
 
-pair : expr pair {NSLog(@"pair 1"); $$ = cons($1, $2);}
+pair : expr pair {NSLog(@"pair 1"); tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 | ')' {NSLog(@"pair 2"); $$ = the_empty_list;}
 ;
 

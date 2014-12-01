@@ -31,6 +31,10 @@
 
 @class RSObject;
 
+NSMutableArray *tmpRSObjectRetainedBuffer;  //ARC security buffer
+NSMutableString *outputString;  //tmp
+RSObject *env;      //tmp
+
 @interface RSBoolNumber : NSObject
 @property long value;
 @end

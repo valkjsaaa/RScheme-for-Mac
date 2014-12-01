@@ -4,22 +4,23 @@
     #import "MessageBlocks.h"
     
     void yyerror(char *s);
-    
+    extern NSMutableArray * tmpRSObjectRetainedBuffer;
+    RSObject *tmpToken;
 %}
 
 %%
 
--?[0-9]+\.[0-9]* { yylval.expression = make_floatnum(atof(yytext)); ; return FLOAT; }
+-?[0-9]+\.[0-9]* { tmpToken = make_floatnum(atof(yytext)); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return FLOAT; }
 
--?[0-9]+ { yylval.expression = make_fixnum(atoi(yytext)); return FIX; }
+-?[0-9]+ { tmpToken = make_fixnum(atoi(yytext)); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return FIX; }
 
-\#t {yylval.expression = true_value; return _BOOL;}
-\#f {yylval.expression = false_value; return _BOOL;}
-\#\\[a-zA-Z] {yylval.expression = read_character([NSMutableString stringWithUTF8String:yytext+2]); return CHAR;}
+\#t { tmpToken = true_value; yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return _BOOL;}
+\#f { tmpToken = false_value; yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return _BOOL;}
+\#\\[a-zA-Z] { tmpToken = read_character([NSMutableString stringWithUTF8String:yytext+2]); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return CHAR;}
 
-[a-zA-Z!$%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {yylval.expression = make_symbol([NSString stringWithUTF8String:yytext]); return IDENTIFIER;}
+[a-zA-Z!$%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return IDENTIFIER;}
 
-\".*\" { yylval.expression = make_string([NSString stringWithFormat:@"\"%s\"",yytext]); return STR;}
+\".*\" { tmpToken = make_string([NSString stringWithFormat:@"\"%s\"",yytext]); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return STR;}
 
 [\n\t ] { }
 

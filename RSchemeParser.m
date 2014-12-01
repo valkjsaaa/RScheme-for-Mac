@@ -7,6 +7,8 @@
 //
 
 #import "RSchemeParser.h"
+#import "MessageBlocks.h"
+#import "YYParserParams.h"
 
 @interface RSchemeParser ()
 
@@ -27,15 +29,25 @@
         RSObject* the_global_environment;
         init(output, &the_global_environment);
         _the_global_environment = the_global_environment;
+        tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];
     }
     return self;
 }
 
 - (void)parse:(NSString*)string error:(NSError* __autoreleasing*)error
 {
-    RSObject* _exp = _read([string mutableCopy]);
-    RSObject* result = eval(_exp, _the_global_environment);
-    _write(_output, result);
+    //RSObject* _exp = _read([string mutableCopy]);
+    //RSObject* result = eval(_exp, _the_global_environment);
+    //_write(_output, result);
+    
+    YY_BUFFER_STATE buf;
+    buf = yy_scan_string(string.UTF8String);
+    outputString = _output;
+    env = _the_global_environment;
+    YYParserParams *params = [[YYParserParams alloc] initWithOut:_output Env:_the_global_environment];
+    yyparse(params);
+    //yyparse();
+    yy_delete_buffer(buf);
 }
 
 - (void)parseMultiline:(NSString*)string error:(NSError* __autoreleasing*)error

@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7C29D5F21A28C150002F46B9 /* parser.ym in Sources */ = {isa = PBXBuildFile; fileRef = 7C29D5F01A28C150002F46B9 /* parser.ym */; };
-		7C29D5F31A28C150002F46B9 /* tokenizer.lm in Sources */ = {isa = PBXBuildFile; fileRef = 7C29D5F11A28C150002F46B9 /* tokenizer.lm */; };
+		7C4186561A2CD09D00BEE995 /* YYParserParams.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C4186551A2CD09D00BEE995 /* YYParserParams.m */; };
 		7CC3E74F1A2767B600B73649 /* MessageBlocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CC3E74E1A2767B600B73649 /* MessageBlocks.m */; };
 		7CC3E7601A27FA1200B73649 /* parser.ym in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F33B1A04DD46002F7463 /* parser.ym */; };
 		7CC3E7611A27FA1200B73649 /* tokenizer.lm in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F33D1A04DD61002F7463 /* tokenizer.lm */; };
@@ -33,8 +32,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		7C29D5F01A28C150002F46B9 /* parser.ym */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.yacc; path = parser.ym; sourceTree = "<group>"; };
-		7C29D5F11A28C150002F46B9 /* tokenizer.lm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = tokenizer.lm; sourceTree = "<group>"; };
+		7C4186541A2CD09D00BEE995 /* YYParserParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYParserParams.h; sourceTree = "<group>"; };
+		7C4186551A2CD09D00BEE995 /* YYParserParams.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYParserParams.m; sourceTree = "<group>"; };
 		7CC3E74D1A2767B600B73649 /* MessageBlocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageBlocks.h; sourceTree = "<group>"; };
 		7CC3E74E1A2767B600B73649 /* MessageBlocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageBlocks.m; sourceTree = "<group>"; };
 		7CC3E75F1A27F31000B73649 /* RSchemeForMac.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RSchemeForMac.pch; path = "RScheme for MacTests/RSchemeForMac.pch"; sourceTree = SOURCE_ROOT; };
@@ -123,8 +122,6 @@
 		8C42F32D1A04DD0C002F7463 /* RScheme for MacTests */ = {
 			isa = PBXGroup;
 			children = (
-				7C29D5F01A28C150002F46B9 /* parser.ym */,
-				7C29D5F11A28C150002F46B9 /* tokenizer.lm */,
 				8C42F3301A04DD0C002F7463 /* RScheme_for_MacTests.m */,
 				8C42F32E1A04DD0C002F7463 /* Supporting Files */,
 			);
@@ -145,6 +142,8 @@
 			children = (
 				8C42F33B1A04DD46002F7463 /* parser.ym */,
 				8C42F33D1A04DD61002F7463 /* tokenizer.lm */,
+				7C4186541A2CD09D00BEE995 /* YYParserParams.h */,
+				7C4186551A2CD09D00BEE995 /* YYParserParams.m */,
 				7CC3E74D1A2767B600B73649 /* MessageBlocks.h */,
 				7CC3E74E1A2767B600B73649 /* MessageBlocks.m */,
 				8C42F3421A04F965002F7463 /* RSchemeParser.h */,
@@ -261,6 +260,7 @@
 				8C42F3201A04DD0C002F7463 /* ViewController.m in Sources */,
 				8C42F31D1A04DD0C002F7463 /* main.m in Sources */,
 				7CC3E74F1A2767B600B73649 /* MessageBlocks.m in Sources */,
+				7C4186561A2CD09D00BEE995 /* YYParserParams.m in Sources */,
 				8C42F3401A04F943002F7463 /* RSchemeParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -269,8 +269,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7C29D5F21A28C150002F46B9 /* parser.ym in Sources */,
-				7C29D5F31A28C150002F46B9 /* tokenizer.lm in Sources */,
 				8C42F3311A04DD0C002F7463 /* RScheme_for_MacTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -319,8 +317,9 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = RSchemeForMac.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -363,7 +362,8 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = RSchemeForMac.pch;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;

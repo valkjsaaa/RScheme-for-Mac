@@ -111,13 +111,11 @@
 
 - (void)testYyParser
 {
-    YY_BUFFER_STATE buf;
-    
-    buf = yy_scan_string("(+ 1 2)");
-    
-    yyparse();
-    
-    yy_delete_buffer(buf);
+    _output = [NSMutableString new];
+    _parser = [[RSchemeParser alloc] initWithFileHandle:_output];
+    [_output setString:@""];
+    [_parser parse:@"(+ 1 2)" error:nil];
+    NSLog(@"%@", _output);
 }
 
 - (void)testPerformanceExample
@@ -126,6 +124,8 @@
     [self measureBlock:^{
         [self testExample];
         [self testArithmetic];
+        [self testDefine];
+        [self testYyParser];
         // Put the code you want to measure the time of here.
     }];
 }
