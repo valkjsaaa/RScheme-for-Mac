@@ -30,7 +30,7 @@
 %%
 
 prog : expr {NSLog(@"expr: %@", $1); _write(outputString, eval($1, env));}
-| expr prog {NSLog(@"expr: %@", $1);}
+| prog expr {NSLog(@"expr: %@", $2); _write(outputString, eval($2, env));}
 ;
 
 expr : '(' pair {$$ = $2;}
