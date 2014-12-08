@@ -131,6 +131,9 @@
     [_parser parse:@"(define $a 2)" error:nil];
     [_parser parse:@"(define $b 2)" error:nil];
     [_parser parse:@"(define $c (+ $a $b))" error:nil];
+    [_parser parse:@"(write $c)" error:nil];
+    [_parser parse:@"(define $a 1)" error:nil];
+    [_parser parse:@"(write $c)" error:nil];
     NSLog(@"%@", _output);
 }
 

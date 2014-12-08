@@ -15,6 +15,8 @@
 
 @property (strong) RSObject* the_global_environment;
 
+@property NSMutableArray* all_expression;
+
 @end
 
 @implementation RSchemeParser
@@ -29,6 +31,7 @@
         init(output, &the_global_environment);
         _the_global_environment = the_global_environment;
         tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];
+        _all_expression = [NSMutableArray new];
     }
     return self;
 }
@@ -45,14 +48,25 @@
     //env = _the_global_environment;
     //YYParserParams* params = [[YYParserParams alloc] initWithOut:_output Env:_the_global_environment];
     //yyparse(params);
-    NSMutableArray *expressions = [[NSMutableArray alloc] init];
+    NSMutableArray* expressions = [[NSMutableArray alloc] init];
     yyparse(&expressions);
-    for (RSObject *obj in expressions){
+    [_all_expression addObjectsFromArray:expressions];
+    for (RSObject* obj in expressions) {
 #ifdef DEBUG
         NSLog(@"%@", obj);
 #endif
-        RSObject *result = eval(obj, _the_global_environment);
+        RSObject* result = eval(obj, _the_global_environment);
         _write(_output, result);
+        while (changedSignal.count) {
+            RSObject* currentSignal = [changedSignal anyObject];
+            [changedSignal removeObject:currentSignal];
+            for (RSObject* obj2 in _all_expression) {
+                if ([obj2.sensitiveSignals containsObject:currentSignal]) {
+                    RSObject* result = eval(obj2, _the_global_environment);
+                    _write(_output, result);
+                }
+            }
+        }
     }
     //yyparse();
     yy_delete_buffer(buf);
