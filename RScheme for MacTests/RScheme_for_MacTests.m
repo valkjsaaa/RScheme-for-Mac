@@ -9,7 +9,6 @@
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
 #import "RSchemeParser.h"
-#import "y.tab.h"
 #import "MessageBlocks.h"
 
 @interface RScheme_for_MacTests : XCTestCase
@@ -88,6 +87,11 @@
 {
     [_output setString:@""];
     _parser = [[RSchemeParser alloc] initWithFileHandle:_output];
+    [_parser parse:@"(define b 2)" error:nil];
+    [_parser parse:@"(write b)" error:nil];
+    XCTAssert([_output isEqualToString:@"ok2ok"]);
+    [_output setString:@""];
+    _parser = [[RSchemeParser alloc] initWithFileHandle:_output];
     [_parser parse:@"(define c (lambda () (define a 1) (define (b) a) b))" error:nil];
     [_parser parse:@" (write ((c)))" error:nil];
     XCTAssert([_output isEqualToString:@"ok1ok"]);
@@ -115,6 +119,18 @@
     _parser = [[RSchemeParser alloc] initWithFileHandle:_output];
     [_output setString:@""];
     [_parser parse:@"(+ 1 2)" error:nil];
+    NSLog(@"%@", _output);
+}
+
+- (void)testSignal
+{
+    _output = [NSMutableString new];
+    _parser = [[RSchemeParser alloc] initWithFileHandle:_output];
+    [_output setString:@""];
+    [_parser parse:@"(define $a 1)" error:nil];
+    [_parser parse:@"(define $a 2)" error:nil];
+    [_parser parse:@"(define $b 2)" error:nil];
+    [_parser parse:@"(define $c (+ $a $b))" error:nil];
     NSLog(@"%@", _output);
 }
 

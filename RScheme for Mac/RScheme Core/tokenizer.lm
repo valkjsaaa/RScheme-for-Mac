@@ -18,7 +18,11 @@
 \#f { tmpToken = false_value; yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return _BOOL;}
 \#\\[a-zA-Z] { tmpToken = read_character([NSMutableString stringWithUTF8String:yytext+2]); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return CHAR;}
 
-[a-zA-Z!$%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return IDENTIFIER;}
+define {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return DEFINE;}
+
+$([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])* {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); tmpToken.isSignal = YES; NSLog(@"token: %@", tmpToken); [tmpToken.sensitiveSignals addObject:tmpToken];yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return SIGNAL;}
+
+[a-zA-Z!%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return IDENTIFIER;}
 
 \".*\" { tmpToken = make_string([NSString stringWithFormat:@"\"%s\"",yytext]); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return STR;}
 
