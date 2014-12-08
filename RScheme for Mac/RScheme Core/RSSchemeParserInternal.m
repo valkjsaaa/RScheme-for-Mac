@@ -822,7 +822,7 @@ void set_variable_value(RSObject* var, RSObject* val, RSObject* env)
     RSObject* frame;
     RSObject* vars;
     RSObject* vals;
-    if (var.isSignal && is_equal(lookup_variable_value(var, env), val, env)) {
+    if (var.isSignal && !is_equal(lookup_variable_value(var, env), val, env)) {
         [changedSignal addObject:var];
         NSLog(@"Signal Changed:%@", var);
     }
@@ -856,7 +856,7 @@ void define_variable(RSObject* var, RSObject* val, RSObject* env)
 
     while (!is_the_empty_list(vars)) {
         if (var == car(vars)) {
-            if (var.isSignal && is_equal(lookup_variable_value(var, env), val, env)) {
+            if (var.isSignal && !is_equal(lookup_variable_value(var, env), val, env)) {
                 [changedSignal addObject:var];
                 NSLog(@"Signal Changed:%@", var);
             }
