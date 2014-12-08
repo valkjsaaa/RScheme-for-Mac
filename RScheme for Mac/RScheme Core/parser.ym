@@ -20,13 +20,19 @@
 %token <expression> FLOAT
 
 %token <expression> IDENTIFIER
+%token <expression> DEFINE
+%token <expression> SIGNAL
 
 %token <expression> STR
 %token <expression> CHAR
 %token <expression> _BOOL
 
-%type <expression> expr
-%type <expression> pair
+%type <expression> expression
+%type <expression> expression_static
+%type <expression> expression_signal
+%type <expression> pair_static
+%type <expression> pair_signal
+%type <expression> statement
 %%
 
 prog : expr {_write(outputString, eval($1, env));}
@@ -40,10 +46,15 @@ expr : '(' pair {$$ = $2;}
 | _BOOL {$$ = $1;}
 | CHAR {$$ = $1;}
 | IDENTIFIER {$$ = $1;}
+|'(' DEFINE expression_static expression_static ')' {tmpRSObject = cons($2, cons($3, cons($4,the_empty_list)));[tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;NSLog(@"define");}
 ;
 
 pair : expr pair {tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 | ')' {$$ = the_empty_list;}
+;
+
+pair_signal : expression_signal pair_static {NSLog(@"pair 1"); tmpRSObject = cons($1, $2); [tmpRSObject.sensitiveSignals setSet: $1.sensitiveSignals]; [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
+|expression pair_signal {NSLog(@"pair 1"); tmpRSObject = cons($1, $2);[tmpRSObject.sensitiveSignals setSet: $1.sensitiveSignals]; [tmpRSObject.sensitiveSignals unionSet: $2.sensitiveSignals]; [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 ;
 
 %%

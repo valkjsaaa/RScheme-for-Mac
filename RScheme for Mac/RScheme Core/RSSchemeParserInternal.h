@@ -31,9 +31,11 @@
 
 @class RSObject;
 
-NSMutableArray *tmpRSObjectRetainedBuffer;  //ARC security buffer
-NSMutableString *outputString;  //tmp
-RSObject *env;      //tmp
+NSMutableArray* tmpRSObjectRetainedBuffer; //ARC security buffer
+NSMutableString* outputString; //tmp
+NSMutableSet* changedSignal;
+
+RSObject* env; //tmp
 
 @interface RSBoolNumber : NSObject
 @property long value;
@@ -84,23 +86,25 @@ RSObject *env;      //tmp
 @end
 
 typedef enum : NSUInteger {
-    THE_EMPTY_LIST,
-    BOOLEAN,
-    SYMBOL,
-    FIXNUM,
-    FLOATNUM,
-    CHARACTER,
-    STRING,
-    PAIR,
-    PRIMITIVE_PROC,
-    PRIMITIVE_BLOCK,
-    COMPOUND_PROC,
-} RSObjectType;
+                   THE_EMPTY_LIST,
+                   BOOLEAN,
+                   SYMBOL,
+                   FIXNUM,
+                   FLOATNUM,
+                   CHARACTER,
+                   STRING,
+                   PAIR,
+                   PRIMITIVE_PROC,
+                   PRIMITIVE_BLOCK,
+                   COMPOUND_PROC,
+               } RSObjectType;
 
 @interface RSObject : NSObject
 - (instancetype)init;
 @property RSInternalData* data;
 @property RSObjectType type;
+@property BOOL isSignal;
+@property NSMutableSet* sensitiveSignals;
 @end
 
 typedef RSObject* (^RSObjectBlock)(RSObject*);
@@ -242,6 +246,8 @@ RSObject* sub_proc(RSObject* arguments);
 RSObject* mul_proc(RSObject* arguments);
 
 RSObject* quotient_proc(RSObject* arguments);
+
+BOOL is_equal(RSObject* a, RSObject* b, RSObject* env);
 
 RSObject* remainder_proc(RSObject* arguments);
 
