@@ -32,10 +32,7 @@
 @class RSObject;
 
 NSMutableArray* tmpRSObjectRetainedBuffer; //ARC security buffer
-NSMutableString* outputString; //tmp
 NSMutableSet* changedSignal;
-
-RSObject* env; //tmp
 
 @interface RSBoolNumber : NSObject
 @property long value;

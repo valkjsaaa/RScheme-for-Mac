@@ -20,7 +20,7 @@ extern void (^ParseTestFailBlock)(NSString *msg);
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 YY_BUFFER_STATE  yy_scan_string(const char *s);
 
-int yyparse(YYParserParams *params);
+int yyparse(NSMutableArray **expressions);
 //int yyparse();
 void yy_delete_buffer(YY_BUFFER_STATE buf);
 

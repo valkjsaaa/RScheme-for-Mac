@@ -8,7 +8,6 @@
 
 #import "RSchemeParser.h"
 #import "MessageBlocks.h"
-#import "YYParserParams.h"
 
 @interface RSchemeParser ()
 
@@ -42,10 +41,19 @@
     changedSignal = [NSMutableSet new];
     YY_BUFFER_STATE buf;
     buf = yy_scan_string(string.UTF8String);
-    outputString = _output;
-    env = _the_global_environment;
-    YYParserParams* params = [[YYParserParams alloc] initWithOut:_output Env:_the_global_environment];
-    yyparse(params);
+    //outputString = _output;
+    //env = _the_global_environment;
+    //YYParserParams* params = [[YYParserParams alloc] initWithOut:_output Env:_the_global_environment];
+    //yyparse(params);
+    NSMutableArray *expressions = [[NSMutableArray alloc] init];
+    yyparse(&expressions);
+    for (RSObject *obj in expressions){
+#ifdef DEBUG
+        NSLog(@"%@", obj);
+#endif
+        RSObject *result = eval(obj, _the_global_environment);
+        _write(_output, result);
+    }
     //yyparse();
     yy_delete_buffer(buf);
 }

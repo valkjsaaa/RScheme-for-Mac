@@ -7,11 +7,11 @@
     int yylex(void);
     extern NSMutableArray * tmpRSObjectRetainedBuffer;
     RSObject * tmpRSObject;
-    void yyerror(YYParserParams *params, char *s);
+    void yyerror(NSMutableArray **expressions, char *s);
     
 %}
 
-%parse-param {YYParserParams *params}
+%parse-param {NSMutableArray **expressions}
 %union {
     __unsafe_unretained RSObject * expression;
 }
@@ -35,12 +35,25 @@
 %type <expression> statement
 %%
 
-prog : expr {_write(outputString, eval($1, env));}
-| prog expr {_write(outputString, eval($2, env));}
+program :
+statement {NSLog(@"expr: %@", $1); [*expressions addObject: $1]; tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];}
+| program statement {NSLog(@"expr: %@", $2); [*expressions addObject: $2]; tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];}
 ;
 
-expr : '(' pair {$$ = $2;}
-| '\'' expr {tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
+statement :
+'(' DEFINE SIGNAL expression ')' {tmpRSObject = cons($2, cons($3, cons($4,the_empty_list)));[tmpRSObject.sensitiveSignals setSet: $4.sensitiveSignals];[tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;NSLog(@"define");}
+/* | '(' DEFINE '(' SIGNAL pair_static ')' expression ')' */
+| expression { $$ = $1;}
+;
+
+expression :
+expression_signal {$$ = $1;}
+| expression_static {$$ = $1;}
+;
+
+expression_static:
+'(' pair_static {$$ = $2;}
+| '\'' expression_static {tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; NSLog(@"quoted");}
 | FLOAT {$$ = $1;}
 | FIX {$$ = $1;}
 | _BOOL {$$ = $1;}
@@ -49,8 +62,14 @@ expr : '(' pair {$$ = $2;}
 |'(' DEFINE expression_static expression_static ')' {tmpRSObject = cons($2, cons($3, cons($4,the_empty_list)));[tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;NSLog(@"define");}
 ;
 
-pair : expr pair {tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
-| ')' {$$ = the_empty_list;}
+expression_signal:
+'(' pair_signal {$$ = $2;}
+| SIGNAL {$$ = $1;}
+|'(' DEFINE expression_static expression_signal ')' {tmpRSObject = cons($2, cons($3, cons($4,the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;NSLog(@"define");}
+;
+
+pair_static : expression_static pair_static {NSLog(@"pair 1"); tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
+| ')' {NSLog(@"pair 2"); $$ = the_empty_list;}
 ;
 
 pair_signal : expression_signal pair_static {NSLog(@"pair 1"); tmpRSObject = cons($1, $2); [tmpRSObject.sensitiveSignals setSet: $1.sensitiveSignals]; [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
