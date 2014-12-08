@@ -48,22 +48,19 @@
 
 - (IBAction)parseButtonClicked:(NSButton *)sender
 {
-    NSString *parseString = [self.inputTextField.string substringFromIndex:self.nextParseHeadIndex];
-    self.nextParseHeadIndex = self.inputTextField.string.length;
+    //NSString *parseString = [self.inputTextField.string substringFromIndex:self.nextParseHeadIndex];
+    NSString *parseString = self.inputTextField.string;
+    //self.nextParseHeadIndex = self.inputTextField.string.length;
 #ifdef DEBUG
     NSLog(@"%@", parseString);
 #endif
     [self.output setString:@""];
-    [self.parser parseMultiline:parseString error:nil];
+    //[self.parser parseMultiline:parseString error:nil];
+    [self.parser parse:parseString error:nil];
 #ifdef DEBUG
     NSLog(@"%@", self.output);
 #endif
-#ifdef OUTPUTLINE
-    self.outputTextView.string = [self.outputTextView.string stringByAppendingFormat:@"%@\n", self.output];
-#else
-    self.outputTextView.string = [self.outputTextView.string stringByAppendingString:self.output];
-#endif
-     
+    self.outputTextView.string = self.output;
 }
 
 @end

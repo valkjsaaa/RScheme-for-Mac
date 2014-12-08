@@ -18,7 +18,7 @@
 \#f { tmpToken = false_value; yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return _BOOL;}
 \#\\[a-zA-Z] { tmpToken = read_character([NSMutableString stringWithUTF8String:yytext+2]); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return CHAR;}
 
-[a-zA-Z!$%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return IDENTIFIER;}
+[a-zA-Z!$%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {yylval.expression = make_symbol([NSString stringWithUTF8String:yytext]); return IDENTIFIER;}
 
 \".*\" { tmpToken = make_string([NSString stringWithFormat:@"\"%s\"",yytext]); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return STR;}
 
@@ -38,4 +38,5 @@ void yyerror(char *s)
 {
     //if (ParseTestFailBlock)
     //ParseTestFailBlock([NSString stringWithFormat:@"%s", s]);
+    NSLog(@"%s", s);
 }

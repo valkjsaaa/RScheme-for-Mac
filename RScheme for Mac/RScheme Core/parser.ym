@@ -29,12 +29,12 @@
 %type <expression> pair
 %%
 
-prog : expr {NSLog(@"expr: %@", $1); _write(outputString, eval($1, env));}
-| prog expr {NSLog(@"expr: %@", $2); _write(outputString, eval($2, env));}
+prog : expr {_write(outputString, eval($1, env));}
+| prog expr {_write(outputString, eval($2, env));}
 ;
 
 expr : '(' pair {$$ = $2;}
-| '\'' expr {tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; NSLog(@"quoted");}
+| '\'' expr {tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 | FLOAT {$$ = $1;}
 | FIX {$$ = $1;}
 | _BOOL {$$ = $1;}
@@ -42,8 +42,8 @@ expr : '(' pair {$$ = $2;}
 | IDENTIFIER {$$ = $1;}
 ;
 
-pair : expr pair {NSLog(@"pair 1"); tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
-| ')' {NSLog(@"pair 2"); $$ = the_empty_list;}
+pair : expr pair {tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
+| ')' {$$ = the_empty_list;}
 ;
 
 %%
