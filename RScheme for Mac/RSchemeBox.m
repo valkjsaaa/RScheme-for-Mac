@@ -24,6 +24,8 @@
         self.contentTextField = [[NSTextField alloc] initWithFrame:NSRectFromCGRect(CGRectMake(13, 37, 70, 22))];
         self.numericCheckBox = [[NSButton alloc] initWithFrame:NSRectFromCGRect(CGRectMake(11, 8, 74, 18))];
         self.numericCheckBox.state = 1;
+        [self.numericCheckBox setTarget:self];
+        [self.numericCheckBox setAction:@selector(checkBoxClick:)];
         [self.numericCheckBox setButtonType:NSSwitchButton];
         self.panGestureRecognizer = [[NSPanGestureRecognizer alloc] initWithTarget:self action:@selector(dragging:)];
         self.numeric = self.numericCheckBox.state;
@@ -54,6 +56,7 @@
 - (IBAction)checkBoxClick:(NSButton *)sender
 {
     self.numeric = sender.state;
+    NSLog(@"%d", self.isNumeric);
 }
 
 - (IBAction)dragging:(NSPanGestureRecognizer *)sender
