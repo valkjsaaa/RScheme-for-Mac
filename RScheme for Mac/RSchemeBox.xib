@@ -57,6 +57,7 @@
                 <outlet property="panGestureRecognizer" destination="cHE-jT-6kK" id="sbp-7Z-A36"/>
                 <outlet property="titleTextField" destination="Tpw-ai-k0F" id="Jfh-rt-u02"/>
             </connections>
+            <point key="canvasLocation" x="101" y="326.5"/>
         </box>
     </objects>
 </document>

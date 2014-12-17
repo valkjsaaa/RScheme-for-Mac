@@ -91,6 +91,7 @@
     NSLog(@"%@", self.output);
 #endif
     self.outputTextView.string = self.output;
+    [self.inputTextField selectAll:self];
 }
 
 @end
