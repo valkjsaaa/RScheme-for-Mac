@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C4C08C91A41CD00006EA94F /* RSchemeBox.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7C4C08C81A41CD00006EA94F /* RSchemeBox.xib */; };
+		7C4C08CC1A41CD6B006EA94F /* RSchemeBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C4C08CB1A41CD6B006EA94F /* RSchemeBox.m */; };
 		7CC3E74F1A2767B600B73649 /* MessageBlocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CC3E74E1A2767B600B73649 /* MessageBlocks.m */; };
 		7CC3E7601A27FA1200B73649 /* parser.ym in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F33B1A04DD46002F7463 /* parser.ym */; };
 		7CC3E7611A27FA1200B73649 /* tokenizer.lm in Sources */ = {isa = PBXBuildFile; fileRef = 8C42F33D1A04DD61002F7463 /* tokenizer.lm */; };
@@ -31,6 +33,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7C4C08C81A41CD00006EA94F /* RSchemeBox.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RSchemeBox.xib; sourceTree = "<group>"; };
+		7C4C08CA1A41CD6B006EA94F /* RSchemeBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSchemeBox.h; sourceTree = "<group>"; };
+		7C4C08CB1A41CD6B006EA94F /* RSchemeBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSchemeBox.m; sourceTree = "<group>"; };
 		7CC3E74D1A2767B600B73649 /* MessageBlocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageBlocks.h; sourceTree = "<group>"; };
 		7CC3E74E1A2767B600B73649 /* MessageBlocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageBlocks.m; sourceTree = "<group>"; };
 		7CC3E75F1A27F31000B73649 /* RSchemeForMac.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RSchemeForMac.pch; path = "RScheme for MacTests/RSchemeForMac.pch"; sourceTree = SOURCE_ROOT; };
@@ -101,6 +106,9 @@
 				8C42F31F1A04DD0C002F7463 /* ViewController.m */,
 				8C42F3211A04DD0C002F7463 /* Images.xcassets */,
 				8C42F3231A04DD0C002F7463 /* Main.storyboard */,
+				7C4C08C81A41CD00006EA94F /* RSchemeBox.xib */,
+				7C4C08CA1A41CD6B006EA94F /* RSchemeBox.h */,
+				7C4C08CB1A41CD6B006EA94F /* RSchemeBox.m */,
 				8C42F3171A04DD0C002F7463 /* Supporting Files */,
 			);
 			path = "RScheme for Mac";
@@ -231,6 +239,7 @@
 			files = (
 				8C42F3221A04DD0C002F7463 /* Images.xcassets in Resources */,
 				8C42F3251A04DD0C002F7463 /* Main.storyboard in Resources */,
+				7C4C08C91A41CD00006EA94F /* RSchemeBox.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +263,7 @@
 				8C55AA991A1E64DF005DFB44 /* RSSchemeParserInternal.m in Sources */,
 				8C42F3201A04DD0C002F7463 /* ViewController.m in Sources */,
 				8C42F31D1A04DD0C002F7463 /* main.m in Sources */,
+				7C4C08CC1A41CD6B006EA94F /* RSchemeBox.m in Sources */,
 				7CC3E74F1A2767B600B73649 /* MessageBlocks.m in Sources */,
 				8C42F3401A04F943002F7463 /* RSchemeParser.m in Sources */,
 			);
