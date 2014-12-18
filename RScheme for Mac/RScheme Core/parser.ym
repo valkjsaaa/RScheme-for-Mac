@@ -60,6 +60,7 @@ expression_static:
 | CHAR {$$ = $1;}
 | IDENTIFIER {$$ = $1;}
 |'(' DEFINE expression_static expression_static ')' {tmpRSObject = cons($2, cons($3, cons($4,the_empty_list)));[tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;NSLog(@"define");}
+|'(' expression_signal ')' {$$ = $2;}
 ;
 
 expression_signal:
