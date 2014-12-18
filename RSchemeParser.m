@@ -13,8 +13,6 @@
 
 @property NSMutableString* output;
 
-@property (strong) RSObject* the_global_environment;
-
 @property NSMutableArray* all_expression;
 
 @end
@@ -70,6 +68,20 @@
     }
     //yyparse();
     yy_delete_buffer(buf);
+}
+
+- (void)propagate
+{
+    while (changedSignal.count) {
+        RSObject* currentSignal = [changedSignal anyObject];
+        [changedSignal removeObject:currentSignal];
+        for (RSObject* obj2 in _all_expression) {
+            if ([obj2.sensitiveSignals containsObject:currentSignal]) {
+                RSObject* result = eval(obj2, _the_global_environment);
+                _write(_output, result);
+            }
+        }
+    }
 }
 
 - (void)parseMultiline:(NSString*)string error:(NSError* __autoreleasing*)error

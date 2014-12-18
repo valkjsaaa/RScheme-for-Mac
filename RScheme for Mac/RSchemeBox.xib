@@ -29,6 +29,9 @@
                             <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
+                        <connections>
+                            <outlet property="delegate" destination="3F3-dD-cK0" id="CD8-dR-5zt"/>
+                        </connections>
                     </textField>
                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Y2E-Zt-7aF">
                         <rect key="frame" x="18" y="12" width="74" height="18"/>

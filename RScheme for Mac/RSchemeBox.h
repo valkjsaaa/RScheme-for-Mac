@@ -7,14 +7,21 @@
 //
 
 #import <Cocoa/Cocoa.h>
+@class RSchemeBox;
 
-@interface RSchemeBox : NSBox
+typedef void (^SignalChangedHandler)(NSString* signalName, RSchemeBox* box);
+
+@interface RSchemeBox : NSBox<NSControlTextEditingDelegate, NSTextFieldDelegate>
 
 @property (strong) IBOutlet NSTextField *titleTextField;
 @property (strong) IBOutlet NSTextField *contentTextField;
 @property (nonatomic, getter=isNumeric) BOOL numeric;
 @property (strong) IBOutlet NSPanGestureRecognizer *panGestureRecognizer;
+@property (strong) SignalChangedHandler handler;
 
 + (RSchemeBox *)newRSchemeBox;
+
+- (id)initWithFrame:(NSRect)frameRect Handler:(SignalChangedHandler)handler;
+- (IBAction)textChanged:(id)sender;
 
 @end

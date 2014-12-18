@@ -813,8 +813,9 @@ RSObject* lookup_variable_value(RSObject* var, RSObject* env)
         }
         env = enclosing_environment(env);
     }
-    fprintf(stderr, "%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
-    exit(1);
+//    fprintf(stderr, "%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
+//    exit(1);
+    return nil;
 }
 
 void set_variable_value(RSObject* var, RSObject* val, RSObject* env)

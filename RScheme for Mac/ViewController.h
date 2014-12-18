@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "RSSchemeParserInternal.h"
 
 @interface ViewController : NSViewController
 
