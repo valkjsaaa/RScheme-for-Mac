@@ -28,6 +28,7 @@
 %token <expression> _BOOL
 
 %type <expression> expression
+%type <expression> non_signal_expression
 %type <expression> pair
 %type <expression> statement
 %type <expression> define_signal
@@ -40,7 +41,10 @@ program: statement {NSLog(@"statement: %@", $1); [*expressions addObject: $1]; t
 statement: define_signal {$$ = $1;}
 | expression {$$ = $1; $$.sensitiveSignals = [[NSMutableSet alloc] init];}
 
-expression: '(' pair {NSLog(@"pairs"); $$ = $2;}
+expression : non_signal_expression {$$ = $1; NSLog(@"has SIGNAL");}
+| SIGNAL {$$ = $1; NSLog(@"has SIGNAL");}
+
+non_signal_expression: '(' pair {NSLog(@"pairs"); $$ = $2;}
 | '\'' expression {NSLog(@"quoted"); tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 | define_other { $$ = $1; NSLog(@"expression have define_other");}
 | FLOAT {$$ = $1; NSLog(@"FLOAT");}
@@ -48,7 +52,6 @@ expression: '(' pair {NSLog(@"pairs"); $$ = $2;}
 | _BOOL {$$ = $1; NSLog(@"BOOL");}
 | CHAR {$$ = $1; NSLog(@"CHAR");}
 | IDENTIFIER {$$ = $1; NSLog(@"IDENTIFIER");}
-| SIGNAL {$$ = $1; NSLog(@"has SIGNAL");}
 | STR {$$ = $1; NSLog(@"has STR");}
 
 pair: expression pair {NSLog(@"%@ pairs", $1); tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; [$$.sensitiveSignals unionSet: $1.sensitiveSignals]; [$$.sensitiveSignals unionSet: $2.sensitiveSignals];}
@@ -56,7 +59,7 @@ pair: expression pair {NSLog(@"%@ pairs", $1); tmpRSObject = cons($1, $2); [tmpR
 
 define_signal: '(' DEFINE SIGNAL expression ')' { tmpRSObject = cons($2, cons($3, cons($4, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; NSLog(@"define signal"); $$.sensitiveSignals = $4.sensitiveSignals; NSLog(@"difine_signal sensitive: %@ %@", $3, $$.sensitiveSignals);}
 
-define_other : '(' DEFINE IDENTIFIER expression ')' {NSLog(@"normal define"); tmpRSObject = cons($2, cons($3, cons($4, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
+define_other : '(' DEFINE non_signal_expression expression ')' {NSLog(@"normal define"); tmpRSObject = cons($2, cons($3, cons($4, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 | '(' DEFINE SIGNAL ')' {NSLog(@"nil signal define"); tmpRSObject = cons($2, cons($3, cons(the_empty_list, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 | '(' DEFINE IDENTIFIER ')' {NSLog(@"nil Var define"); tmpRSObject = cons($2, cons($3, cons(the_empty_list, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
 
