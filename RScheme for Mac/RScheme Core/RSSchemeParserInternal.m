@@ -1812,6 +1812,7 @@ tailcall:
         }
     }
     else {
+        NSLog(@"%@", exp);
         fprintf(stderr, "cannot eval unknown expression type\n");
         exit(1);
     }
