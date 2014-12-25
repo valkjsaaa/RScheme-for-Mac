@@ -9,7 +9,7 @@
     RSObject * tmpRSObject;
     void yyerror(NSMutableArray **expressions, char *s);
     
-%}
+    %}
 
 %parse-param {NSMutableArray **expressions}
 %union {
@@ -28,39 +28,30 @@
 %token <expression> _BOOL
 
 %type <expression> expression
-%type <expression> non_signal_expression
-%type <expression> pair
+%type <expression> program
 %type <expression> statement
-%type <expression> define_signal
-%type <expression> define_other
+%type <expression> pair
 %%
 
-program: statement {NSLog(@"statement: %@", $1); [*expressions addObject: $1]; tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];}
-| program statement {NSLog(@"statements continue: %@", $2); [*expressions addObject: $2]; tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];}
+program: statement {NSLog(@"statement: %@", $1); if($1.isSignal == NO){$1.sensitiveSignals = [NSMutableSet new];}[*expressions addObject: $1]; tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];}
+| program statement {NSLog(@"statements continue: %@", $2); if($2.isSignal == NO){$2.sensitiveSignals = [NSMutableSet new];}[*expressions addObject: $2]; tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];}
 
-statement: define_signal {$$ = $1;}
-| expression {$$ = $1; $$.sensitiveSignals = [[NSMutableSet alloc] init];}
+statement : expression {$$ = $1;}
+;
 
-expression : non_signal_expression {$$ = $1; NSLog(@"has SIGNAL");}
-| SIGNAL {$$ = $1; NSLog(@"has SIGNAL");}
+expression : '(' pair {$$ = $2;}
+| '\'' expression {tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; NSLog(@"quoted");}
+| FLOAT {$$ = $1;}
+| FIX {$$ = $1;}
+| _BOOL {$$ = $1;}
+| CHAR {$$ = $1;}
+| IDENTIFIER {$$ = $1;}
+| SIGNAL {$$ = $1;}
+| '(' DEFINE expression expression ')'{ tmpRSObject = cons($2, cons($3, cons($4, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; if($3.sensitiveSignals.count){NSLog(@"define signal"); $$.sensitiveSignals = $4.sensitiveSignals; $$.isSignal = YES; NSLog(@"difine_signal sensitive: %@ %@", $3, $$.sensitiveSignals);}}
+;
 
-non_signal_expression: '(' pair {NSLog(@"pairs"); $$ = $2;}
-| '\'' expression {NSLog(@"quoted"); tmpRSObject = cons(quote_symbol, cons($2, the_empty_list)); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
-| define_other { $$ = $1; NSLog(@"expression have define_other");}
-| FLOAT {$$ = $1; NSLog(@"FLOAT");}
-| FIX {$$ = $1; NSLog(@"FIX");}
-| _BOOL {$$ = $1; NSLog(@"BOOL");}
-| CHAR {$$ = $1; NSLog(@"CHAR");}
-| IDENTIFIER {$$ = $1; NSLog(@"IDENTIFIER");}
-| STR {$$ = $1; NSLog(@"has STR");}
-
-pair: expression pair {NSLog(@"%@ pairs", $1); tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; [$$.sensitiveSignals unionSet: $1.sensitiveSignals]; [$$.sensitiveSignals unionSet: $2.sensitiveSignals];}
-| ')' {NSLog(@"pair end"); $$ = the_empty_list;}
-
-define_signal: '(' DEFINE SIGNAL expression ')' { tmpRSObject = cons($2, cons($3, cons($4, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; NSLog(@"define signal"); $$.sensitiveSignals = $4.sensitiveSignals; NSLog(@"difine_signal sensitive: %@ %@", $3, $$.sensitiveSignals);}
-
-define_other : '(' DEFINE non_signal_expression expression ')' {NSLog(@"normal define"); tmpRSObject = cons($2, cons($3, cons($4, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
-| '(' DEFINE SIGNAL ')' {NSLog(@"nil signal define"); tmpRSObject = cons($2, cons($3, cons(the_empty_list, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
-| '(' DEFINE IDENTIFIER ')' {NSLog(@"nil Var define"); tmpRSObject = cons($2, cons($3, cons(the_empty_list, the_empty_list))); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject;}
+pair : expression pair {NSLog(@"%@ pairs", $1); tmpRSObject = cons($1, $2); [tmpRSObjectRetainedBuffer addObject: tmpRSObject]; $$ = tmpRSObject; [$$.sensitiveSignals unionSet: $1.sensitiveSignals]; [$$.sensitiveSignals unionSet: $2.sensitiveSignals];}
+| ')' {NSLog(@"pair 2"); $$ = the_empty_list;}
+;
 
 %%

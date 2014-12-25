@@ -20,6 +20,9 @@
 
 define {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return DEFINE;}
 
+set! {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return DEFINE;}
+
+
 $([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])* {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); tmpToken.isSignal = YES; NSLog(@"token SIGNAL: %@", tmpToken); [tmpToken.sensitiveSignals addObject:tmpToken];yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return SIGNAL;}
 
 [a-zA-Z!%&\*/:<>=\?\^_~]([a-zA-Z!$%&\*/:<>=\?\^_~]|[0-9]|[+-\.@])*|[+-]|\.\.\. {tmpToken = make_symbol([NSString stringWithUTF8String:yytext]); NSLog(@"token IDENTIFIER: %@", tmpToken); yylval.expression = tmpToken; [tmpRSObjectRetainedBuffer addObject: tmpToken]; return IDENTIFIER;}
