@@ -813,8 +813,8 @@ RSObject* lookup_variable_value(RSObject* var, RSObject* env)
         }
         env = enclosing_environment(env);
     }
-//    fprintf(stderr, "%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
-//    exit(1);
+    //    fprintf(stderr, "%s", [[NSString stringWithFormat:@"unbound variable, %@\n", var.data.symbol.value] UTF8String]);
+    //    exit(1);
     return nil;
 }
 
@@ -939,7 +939,7 @@ void populate_environment(RSObject* env, RSObject* the_global_environment)
     add_block(@"environment", environment_proc(the_global_environment));
     add_procedure(@"eval", eval_proc);
 
-    //    add_procedure(@"load", load_proc);
+    //add_procedure(@"load", load_proc);
     //    add_procedure(@"open-input-port", open_input_port_proc);
     //    add_procedure(@"close-input-port", close_input_port_proc);
     //    add_procedure(@"input-port?", is_input_port_proc);
@@ -1701,8 +1701,8 @@ RSObject* eval(RSObject* exp, RSObject* env)
     RSObject* arguments;
     RSObject* result;
 
-    // when comes in eval, the AST (RSObject *exp) is the least one strong pointer point to all work done by bison, which ensure the ARC
-    //tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];
+// when comes in eval, the AST (RSObject *exp) is the least one strong pointer point to all work done by bison, which ensure the ARC
+//tmpRSObjectRetainedBuffer = [[NSMutableArray alloc] init];
 tailcall:
     if (is_self_evaluating(exp)) {
         return exp;

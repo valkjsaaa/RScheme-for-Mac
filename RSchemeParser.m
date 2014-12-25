@@ -55,16 +55,7 @@
 #endif
         RSObject* result = eval(obj, _the_global_environment);
         _write(_output, result);
-        while (changedSignal.count) {
-            RSObject* currentSignal = [changedSignal anyObject];
-            [changedSignal removeObject:currentSignal];
-            for (RSObject* obj2 in _all_expression) {
-                if ([obj2.sensitiveSignals containsObject:currentSignal]) {
-                    RSObject* result = eval(obj2, _the_global_environment);
-                    _write(_output, result);
-                }
-            }
-        }
+        [self propagate];
     }
     //yyparse();
     yy_delete_buffer(buf);

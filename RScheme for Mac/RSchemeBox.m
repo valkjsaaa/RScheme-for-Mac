@@ -82,6 +82,10 @@
     }
 }
 
+-(void)controlTextDidChange:(NSNotification *)obj{
+    _handler(_titleTextField.stringValue, self);
+}
+
 - (BOOL)control:(NSControl*)control textShouldEndEditing:(NSText*)fieldEditor
 {
     _handler(_titleTextField.stringValue, self);
