@@ -38,7 +38,7 @@
     self.parser = [[RSchemeParser alloc] initWithFileHandle:self.output];
     self.nextParseHeadIndex = 0;
     _boxArray = [NSMutableArray new];
-    RSchemeBox* test = [RSchemeBox newRSchemeBox];
+    //RSchemeBox* test = [RSchemeBox newRSchemeBox];
     //test.frame = NSRectFromCGRect(CGRectMake(10, 10, 108, 109));
     //self.nextResultHeadIndex = 0;
     // Do any additional setup after loading the view.
