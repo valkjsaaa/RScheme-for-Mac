@@ -1,15 +1,34 @@
 RScheme 解释器
 =============
+### 背景
+
+#### Scheme
+Scheme 语言是一种交互式语言, 即: 用户输入一条指令, 解释器根据该 指令改变自身状态并返回一个结果, 输出该结果并等待用户输入下一条指令, 如此往复. 解释器对指令的操作称为 eval (即 evaluate, 求值). Eval 操作的行为主要有以下 4 种情 况: (a) 自求值表达式, 如数字, 字符串等, 对这一类表达式求值的结果仍是其自身 (例 如对1求值的结果还是1);(b) 符号 (即变量名), 在环境中查找, 如有对应, 则返回该对 应值, 否则报错; (c) 引用, 返回被引用的值; (d) 列表, 将列表中除第一项外的其余项应 用 (apply) 于第一项.Apply操作的行为有以下2种情况:(a) 语法 (syntax), 将参数直 接用于该语法; (b) 过程 (procedure), 将参数逐个求值 (eval), 将那些值用于该过程. (语法和过程均可能是解释器自身支持的或用户自己定义的.) 
+
+#### Reactive Programming
+维基百科对计算机程序的定义是：“A computer program, or just a program, is a sequence of instructions, written to perform a specified task with a computer”。计算机程序最早只是为了完成一行特定的任务，然而随着计算设备的普及，计算机程序的功能也由实现一个特定功能逐渐转向长时间提供服务的功能。为了解决这个问题，程序往往采用一个主循环来处理发生的事件，再根据事件，选择相应的处理方法。
+```
+function main
+    initialize()
+    while message != quit
+        message := get_next_message()
+        process_message(message)
+    end while
+end function
+```
+然而这个解决方案虽然解决了界面上提供服务时响应与资源协调的问题，但是其背后的数据流仍然有着此类的矛盾。尤其在Model View Controller的设计方案中，当View发生变化时，Controller函数能否用传统编程方法灵活地处理Model的变化，以及Model的变化如何及时而不影响性能地修改界面，仍然可能是一个问题。
+Reactive Programming的出现寄予予了这类问题一个解决方案。Reactive Programming是基于消息的，是面向数据流变化的。也就是当Reactive Programming中的一个对象发生变化时，它会给相应的对象发送消息，对象会按照定义好的消息处理函数响应这项变化。这样，对外界变化的响应就简化成了根据界面改变改变对应的数据（或结构），预先定义好的模型会自行应用这个更改。
+这种编程模式可以实现更加有效的响应以及更加高效的编程效率。
+
 ### 解释器概述
 
 #### 实现目标
 Objctve-C实现Scheme的Reactive拓展版本——RScheme的解释器
 
 #### Scheme语言及我们的实现Rschme的简介
-1. Scheme语言简介
-Scheme 语言是一种交互式语言, 即: 用户输入一条指令, 解释器根据该 指令改变自身状态并返回一个结果, 输出该结果并等待用户输入下一条指令, 如此往复. 解释器对指令的操作称为 eval (即 evaluate, 求值). Eval 操作的行为主要有以下 4 种情 况: (a) 自求值表达式, 如数字, 字符串等, 对这一类表达式求值的结果仍是其自身 (例 如对1求值的结果还是1);(b) 符号 (即变量名), 在环境中查找, 如有对应, 则返回该对 应值, 否则报错; (c) 引用, 返回被引用的值; (d) 列表, 将列表中除第一项外的其余项应 用 (apply) 于第一项.Apply操作的行为有以下2种情况:(a) 语法 (syntax), 将参数直 接用于该语法; (b) 过程 (procedure), 将参数逐个求值 (eval), 将那些值用于该过程. (语法和过程均可能是解释器自身支持的或用户自己定义的.) 
 
-2. 我们实现的RScheme简介
+
+1. 我们实现的RScheme简介
 除了Eval操作的基本流程之外，我们实现了Scheme的如下语法：lambda, define, if, set!, quote,
 
 同时，我们添加了Reactive特性：
@@ -43,7 +62,7 @@ define signal：声明一个signal变量。signal变量与普通变量的区别�
 4. 添加右图所示的signal显示视图（RShemeBox类），其中第一个textfield用于表示相关联的signal的变量名，第二个textfield显示其值，最下面的checkbox用于声明这个signal是否为数值型变量
 5. signal演示view，所有4按钮创建的右图view都会在5中展示，并且位置可以在5中通过鼠标拖动
 首先是parse过程相关的GUI具体实现：parse按钮被按下后，会触发其在相应的ViewController类中关联的IBAction（Cocoa中的事件动作），IBAction中将会读取目前代码输入框中的内容，然后进行词法语法分析，得到语法树后进行eval操作，然后讲结果写入结果输出框，并且将输入框的所有内容选中保证下次用户输入时会把之前的代码抹除（用户可以取消选中状态）。具体代码如下：
-
+```
 - (IBAction)parseButtonClicked:(NSButton*)sender
 {
     NSString* parseString = self.inputTextField.string;
@@ -57,7 +76,7 @@ define signal：声明一个signal变量。signal变量与普通变量的区别�
     [self.inputTextField selectAll:self];
     [self updateUISignals];
 }
-
+```
 其次便是signal相关的GUI演示部分的实现，同样，按钮4被按下后，会触发想关联的IBAction，通过代码新创建一个RSchemeBox类（具体的图形界面创建代码在RSchemeBox类声明中的initWithFrame方法中），然后添加为View5的子视图。
 
 而对于RSchemeBox类的拖拽动作的实现则比较简单，RSchemeBox类在创建的过程中，添加了一个NSPanGestureRecognizer类的实例作为成员，该类实例可以监控鼠标对于视图的拖拽动作，并且可以关联IBAction在拖拽时进行触发；而在相应的IBAction中，只需要对于被拖拽的视图的边框位置进行相应更改即可。
