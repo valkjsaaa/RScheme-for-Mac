@@ -31,11 +31,17 @@ define signal：声明一个signal变量。signal变量与普通变量的区别�
 ### 解释器设计
 #### GUI
 我们的RScheme解释器的图形界面部分是使用OS X平台上的Cocoa MVC框架实现的，主要图形界面如下图所示：
-1：代码输入框
-2：结果输出框
-3：开始parse的确认按钮
-4：添加右图所示的signal显示视图（RShemeBox类），其中第一个textfield用于表示相关联的signal的变量名，第二个textfield显示其值，最下面的checkbox用于声明这个signal是否为数值型变量
-5：signal演示view，所有4按钮创建的右图view都会在5中展示，并且位置可以在5中通过鼠标拖动
+
+![GUI](/res/gui.png "GUI" )
+
+1. 代码输入框
+2. 结果输出框
+3. 开始parse的确认按钮
+
+![Alt text](/res/widget.png "Optional title")
+
+4. 添加右图所示的signal显示视图（RShemeBox类），其中第一个textfield用于表示相关联的signal的变量名，第二个textfield显示其值，最下面的checkbox用于声明这个signal是否为数值型变量
+5. signal演示view，所有4按钮创建的右图view都会在5中展示，并且位置可以在5中通过鼠标拖动
 首先是parse过程相关的GUI具体实现：parse按钮被按下后，会触发其在相应的ViewController类中关联的IBAction（Cocoa中的事件动作），IBAction中将会读取目前代码输入框中的内容，然后进行词法语法分析，得到语法树后进行eval操作，然后讲结果写入结果输出框，并且将输入框的所有内容选中保证下次用户输入时会把之前的代码抹除（用户可以取消选中状态）。具体代码如下：
 
 - (IBAction)parseButtonClicked:(NSButton*)sender
@@ -80,6 +86,10 @@ define signal：声明一个signal变量。signal变量与普通变量的区别�
 Reactive Scheme 是我们实现的Scheme语言的一个扩展，我们修改了词法语法解释，使得以’$’开头的symbol被解释为一个signal，当一个signal在语法书中自成一个元组时，则视为取signal在执行时的值，除此之外，则视为取signal本身进行求职，这样求值出来的结果仍然为一个signal，当一个statement在全局环境下仍然为signal时，它则会在其敏感的signal发生变化时重新进行求值。
 我们采用了类似队列式的传播过程，当一个signal发生变化时，会添加到changedSignal，当本语句执行完之后，Parser会检查changedSignal，如果有，将会顺序执行所有关于changedSignal敏感的语句（这个过程也可能产生新的变化），最终当changedSignal为空时，停止传播。
 具体函数的实现方法见框图：
+
+![Alt text](/res/parser.png "Optional title")
+
+![Alt text](/res/propagate.tif "Optional title")
 
 ### 总结
 通过本次实习，除了进一步巩固了上学期编译原理课程的讲授知识外，更是亲身体验了设计和编写相对较大的完整实用工程的过程，从中收获了许多的经验和教训。首先便是设计上的障碍。因为我们是在一门成熟语言上面添加新的语法，因而我们上来先选择了直接实现普通Scheme的解释器，并没有太多的考虑我们需要添加的新的语法特性，因而在后来给我们添加reactive特性添加了些许困难；如果我们一开始就设计好，而不是做完了一般之后再在设计方案上面添加新的设计，也许我们在后来遇到的障碍就会少一些；另一方面，因为我们主要目的在于reacitive特性的实现，而并不希望耗费太多精力在普通scheme解释器的实现上面，因而我们上来在实现普通scheme解释器的时候，主要参考了bootstrap scheme的实现，使用了直接强行枚举的词法语法分析实现，并没有使用flex和bison这类封装好的词法语法分析库，因而这一部分的代码的模块性并不好，给后来添加reactive特性相关的语法带来了很大的不便，最终导致了我们重构了我们的词法语法分析部分，这也充分让我们体会到了事前细致周到的设计与规划对于这样完整工程的实现的重要意义。
