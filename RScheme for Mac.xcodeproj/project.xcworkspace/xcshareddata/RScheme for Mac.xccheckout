@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>0C6A04FC-9881-4A75-8967-528834C1BE74</string>
+	<key>IDESourceControlProjectName</key>
+	<string>RScheme for Mac</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>12666C0C2D767B13C5AC7CA4E8D2E2F64E6BF7EF</key>
+		<string>github.com:valkjsaaa/RScheme-for-Mac.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>RScheme for Mac.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>12666C0C2D767B13C5AC7CA4E8D2E2F64E6BF7EF</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:valkjsaaa/RScheme-for-Mac.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>12666C0C2D767B13C5AC7CA4E8D2E2F64E6BF7EF</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>12666C0C2D767B13C5AC7CA4E8D2E2F64E6BF7EF</string>
+			<key>IDESourceControlWCCName</key>
+			<string>RScheme%20for%20Mac</string>
+		</dict>
+	</array>
+</dict>
+</plist>
